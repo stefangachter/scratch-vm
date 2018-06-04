@@ -70,7 +70,7 @@ const makeLedsRGBVector = function (color) {
 
 class Thymio {
     static get ASEBA_HTTP_URL () {
-        return 'http://localhost:3000';
+        return 'http://127.0.0.1:3000';
     }
     static get VMIN () {
         return -500;
