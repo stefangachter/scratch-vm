@@ -709,7 +709,7 @@ class Thymio {
                 rgb.unshift(0);
                 this.sendAction('V_leds_bottom', rgb, () => {
                     this._leds[1] = color + this._leds[1];
-                    rgb = makeLedsRGBVector((parseInt(color + this.leds[2], 10) % 198));
+                    rgb = makeLedsRGBVector((parseInt(color + this._leds[2], 10) % 198));
                     rgb.unshift(1);
                     this.sendAction('V_leds_bottom', rgb, () => {
                         this._leds[2] = color + this._leds[2];
