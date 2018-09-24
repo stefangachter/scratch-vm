@@ -168,7 +168,12 @@ class Thymio {
         const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/${action}/${params}`;
 
         if (typeof callback === 'function') {
-            xmlhttp.onreadystatechange = callback;
+            xmlhttp.onreadystatechange  = () => {
+				if (xmlhttp.readyState !== 4) {
+					return;
+				}
+			callback(xmlhttp);
+			};
         }
 
         xmlhttp.open('GET', url, true);
