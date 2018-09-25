@@ -1304,7 +1304,7 @@ class Scratch3ThymioBlocks {
                 {
                     opcode: 'proxGroundDelta',
                     text: 'ground sensors',
-                    blockType: BlockType.REPORTER
+                    blockType: BlockType.REPORTER 
                 },
                 {
                     opcode: 'micIntensity',
@@ -1341,7 +1341,7 @@ class Scratch3ThymioBlocks {
                 {
                     opcode: 'setOdomoter',
                     text: 'set odometer [N] [O] [P]',
-                    blockType: BlockType.REPORTER,
+                    blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
                             type: ArgumentType.NUMBER,
