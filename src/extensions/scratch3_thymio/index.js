@@ -548,7 +548,7 @@ class Thymio {
         }
 
         const value = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
-        if (value / 500 > 0) {
+        if (value > 50) {
             return true;
         }
         return false;
