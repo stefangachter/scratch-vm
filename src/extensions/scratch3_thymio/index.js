@@ -1773,7 +1773,7 @@ class Scratch3ThymioBlocks {
     arc (args, util) {
         if (this._stackTimerNeedsInit(util)) {
             this.thymio.arc(
-                Cast.toNumber(args.r),
+                Cast.toNumber(args.R),
                 Cast.toNumber(args.A),
                 () => this._stopStackTimer()
             );
