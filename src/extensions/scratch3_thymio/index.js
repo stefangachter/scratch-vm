@@ -1123,10 +1123,10 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'angle',
-                    text: 'angle [A]',
+                    text: 'angle [S]',
                     blockType: BlockType.REPORTER,
                     arguments: {
-                        A: {
+                        S: {
                             type: ArgumentType.STRING,
                             menu: 'angles',
                             defaultValue: 'front'
