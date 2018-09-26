@@ -1821,7 +1821,7 @@ class Scratch3ThymioBlocks {
         return this.thymio.bump(Cast.toNumber(args.N));
     }
     tilt (args) {
-        return this.thymio.tilt(Cast.toNumber(args.T));
+        return this.thymio.tilt(args.T);
     }
     setOdomoter (args) {
         this.thymio.setOdomoter(Cast.toNumber(args.N), Cast.toNumber(args.O), Cast.toNumber(args.P));
