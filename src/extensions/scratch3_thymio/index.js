@@ -819,8 +819,8 @@ class Thymio {
         }
         return false;
     }
-    bump (value) {
-        value = parseInt(value, 10);
+    bump () {
+        const value = 8;
         const num = this.cachedValues[1];
         const acc0 = (((num >> 10) % 32) - 16) * 2;
         const acc1 = (((num >> 5) % 32) - 16) * 2;
@@ -1337,14 +1337,8 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'bump',
-                    text: 'tap [N]',
-                    blockType: BlockType.HAT,
-                    arguments: {
-                        N: {
-                            type: ArgumentType.NUMBER,
-							defaultValue: 8
-                        }
-                    }
+                    text: 'tap',
+                    blockType: BlockType.HAT
                 },
                 {
                     opcode: 'tilt',
@@ -1839,8 +1833,8 @@ class Scratch3ThymioBlocks {
     soundDetected () {
         return this.thymio.soundDetected();
     }
-    bump (args) {
-        return this.thymio.bump(Cast.toNumber(args.N));
+    bump () {
+        return this.thymio.bump();
     }
     tilt (args) {
         return this.thymio.tilt(args.T);
