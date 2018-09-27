@@ -563,7 +563,7 @@ class Thymio {
             }
             return false;
         } else if (sensor === 'back') {
-            if (parseInt(this.cachedValues[22], 10) > threshold || parseInt(this.cachedValues[22], 10) > threshold) {
+            if (parseInt(this.cachedValues[22], 10) > threshold || parseInt(this.cachedValues[23], 10) > threshold) {
                 return true;
             }
             return false;
@@ -1156,7 +1156,8 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'front'
                         },
                         N: {
-                            type: ArgumentType.NUMBER
+                            type: ArgumentType.NUMBER,
+							defaultValue: 100
                         }
                     }
                 },
@@ -1172,7 +1173,7 @@ class Scratch3ThymioBlocks {
                         },
                         R: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 0
+                            defaultValue: 32
                         },
                         G: {
                             type: ArgumentType.NUMBER,
@@ -1180,7 +1181,7 @@ class Scratch3ThymioBlocks {
                         },
                         B: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 32
+                            defaultValue: 0
                         }
                     }
                 },
@@ -1212,7 +1213,7 @@ class Scratch3ThymioBlocks {
                         },
                         C: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 0
+                            defaultValue: 33
                         }
                     }
                 },
@@ -1322,7 +1323,8 @@ class Scratch3ThymioBlocks {
                     blockType: BlockType.BOOLEAN,
                     arguments: {
                         N: {
-                            type: ArgumentType.NUMBER
+                            type: ArgumentType.NUMBER,
+							defaultValue: 8
                         }
                     }
                 },
