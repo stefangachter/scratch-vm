@@ -1136,7 +1136,7 @@ class Scratch3ThymioBlocks {
                 {
                     opcode: 'touching',
                     text: 'object detected [S]',
-                    blockType: BlockType.BOOLEAN,
+                    blockType: BlockType.HAT,
                     arguments: {
                         S: {
                             type: ArgumentType.STRING,
@@ -1148,7 +1148,7 @@ class Scratch3ThymioBlocks {
                 {
                     opcode: 'touchingThreshold',
                     text: 'object detected [S] [N]',
-                    blockType: BlockType.BOOLEAN,
+                    blockType: BlockType.HAT,
                     arguments: {
                         S: {
                             type: ArgumentType.STRING,
@@ -1270,8 +1270,8 @@ class Scratch3ThymioBlocks {
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
-                            type: ArgumentType.STRING,
-                            defaultValue: ''
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
                         }
                     }
                 },
@@ -1281,8 +1281,8 @@ class Scratch3ThymioBlocks {
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
-                            type: ArgumentType.STRING,
-                            defaultValue: ''
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
                         }
                     }
                 },
@@ -1292,8 +1292,8 @@ class Scratch3ThymioBlocks {
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
-                            type: ArgumentType.STRING,
-                            defaultValue: ''
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
                         }
                     }
                 },
@@ -1315,12 +1315,12 @@ class Scratch3ThymioBlocks {
                 {
                     opcode: 'soundDetected',
                     text: 'sound detected',
-                    blockType: BlockType.BOOLEAN
+                    blockType: BlockType.HAT
                 },
                 {
                     opcode: 'bump',
                     text: 'tap [N]',
-                    blockType: BlockType.BOOLEAN,
+                    blockType: BlockType.HAT,
                     arguments: {
                         N: {
                             type: ArgumentType.NUMBER,
