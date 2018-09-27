@@ -540,13 +540,11 @@ class Thymio {
             return false;
         } else if (sensor === 'back') {
             const value = parseInt(this.cachedValues[22], 10) + parseInt(this.cachedValues[23], 10);
-
             if (value / 1000 > 0) {
                 return true;
             }
             return false;
         }
-
         const value = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
         if (value > 50) {
             return true;
@@ -554,21 +552,40 @@ class Thymio {
         return false;
     }
     touchingThreshold (sensor, threshold) {
-        threshold = parseInt(threshold, 10);
-        if (sensor === 'front') {
-            for (let i = 0; i < 5; i++) {
-                if (parseInt(this.cachedValues[17 + i], 10) > threshold) {
+        let limit = 0;
+		if (threshold === 'far')
+			limit=1000;
+		else
+			limit=3000;
+		if (sensor === 'front') {
+                if (parseInt(this.cachedValues[19], 10) > limit) {
                     return true;
                 }
+			return false;	
             }
-            return false;
-        } else if (sensor === 'back') {
-            if (parseInt(this.cachedValues[22], 10) > threshold || parseInt(this.cachedValues[23], 10) > threshold) {
+		else if (sensor === 'left') {
+			if (parseInt(this.cachedValues[17], 10) > limit || parseInt(this.cachedValues[18], 10) > limit) {
+                    return true;
+				}
+				return false;			
+		}
+		else if (sensor === 'right') {
+            if (parseInt(this.cachedValues[20], 10) > limit || parseInt(this.cachedValues[21], 10) > limit) {
+                return true;
+			}
+			return false;			
+		}
+		else if (sensor === 'back') {
+            if (parseInt(this.cachedValues[22], 10) > limit || parseInt(this.cachedValues[23], 10) > limit) {
                 return true;
             }
             return false;
         }
-        if (parseInt(this.cachedValues[15], 10) > threshold || parseInt(this.cachedValues[16], 10) > threshold) {
+		if (threshold === 'far')
+			limit=50;
+		else
+			limit=600;
+        if (parseInt(this.cachedValues[15], 10) > limit || parseInt(this.cachedValues[16], 10) > limit) {
             return true;
         }
         return false;
@@ -1152,12 +1169,13 @@ class Scratch3ThymioBlocks {
                     arguments: {
                         S: {
                             type: ArgumentType.STRING,
-                            menu: 'sensors',
+                            menu: 'sensors2',
                             defaultValue: 'front'
                         },
                         N: {
-                            type: ArgumentType.NUMBER,
-							defaultValue: 100
+                            type: ArgumentType.STRING,
+							menu: 'nearfar',
+							defaultValue: 'near'
                         }
                     }
                 },
@@ -1581,6 +1599,7 @@ class Scratch3ThymioBlocks {
                 leftrightall: ['left', 'right', 'all'],
                 leftright: ['left', 'right'],
                 sensors: ['front', 'back', 'ground'],
+				sensors2: ['left', 'front', 'right', 'back', 'ground'],
                 proxsensors: [
                     {text: 'front far left', value: 0},
                     {text: 'front left', value: 1},
@@ -1595,7 +1614,8 @@ class Scratch3ThymioBlocks {
                 sounds: ['0', '1', '2', '3', '4', '5', '6', '7'],
                 odo: ['direction', 'x', 'y'],
                 tilts: ['front-back', 'top-bottom', 'left-right'],
-                buttons: ['center', 'front', 'back', 'left', 'right']
+                buttons: ['center', 'front', 'back', 'left', 'right'],
+				nearfar: ['near', 'far']
             }
         };
     }
