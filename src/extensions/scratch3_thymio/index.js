@@ -996,6 +996,41 @@ class Thymio {
             return false;
         }
     }
+	valButton (button) {
+        const num = parseInt(this.cachedValues[2], 10);
+
+        if (button === 'center') {
+            const center = parseInt((num >> 3) & 1, 10);
+            if (center === 1) {
+                return true;
+            }
+            return false;
+        } else if (button === 'front') {
+            const forward = parseInt((num >> 2) & 1, 10);
+            if (forward === 1) {
+                return true;
+            }
+            return false;
+        } else if (button === 'back') {
+            const backward = parseInt((num >> 4) & 1, 10);
+            if (backward === 1) {
+                return true;
+            }
+            return false;
+        } else if (button === 'left') {
+            const left = parseInt((num >> 1) & 1, 10);
+            if (left === 1) {
+                return true;
+            }
+            return false;
+        } else if (button === 'right') {
+            const right = parseInt((num) & 1, 10);
+            if (right === 1) {
+                return true;
+            }
+            return false;
+        }
+    }
 }
 
 /**
@@ -1026,13 +1061,13 @@ class Scratch3ThymioBlocks {
             blocks: [
                 {
                     opcode: 'setMotor',
-                    text: 'motor [M] [N]',
+                    text: 'motor speed [M] [N]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         M: {
                             type: ArgumentType.STRING,
                             menu: 'leftrightall',
-                            defaultValue: 'left'
+                            defaultValue: 'all'
                         },
                         N: {
                             type: ArgumentType.NUMBER,
@@ -1622,6 +1657,18 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'center'
                         }
                     }
+                },
+				{
+                    opcode: 'valButton',
+                    text: 'button [B]',
+                    blockType: BlockType.BOOLEAN,
+                    arguments: {
+                        B: {
+                            type: ArgumentType.STRING,
+                            menu: 'buttons',
+                            defaultValue: 'center'
+                        }
+                    }
                 }
             ],
             menus: {
@@ -1947,6 +1994,9 @@ class Scratch3ThymioBlocks {
     }
     whenButton (args) {
         return this.thymio.whenButton(args.B);
+    }
+	valButton (args) {
+        return this.thymio.valButton(args.B);
     }
 }
 
