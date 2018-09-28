@@ -1162,94 +1162,41 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-                {
-                    opcode: 'proximity',
-                    text: 'proximity sensor [N]',
-                    blockType: BlockType.REPORTER,
+				{
+                    opcode: 'arc',
+                    text: 'circle radius [R] angle [A]',
+                    blockType: BlockType.COMMAND,
                     arguments: {
-                        N: {
+                        R: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 2
+                            defaultValue: 150
+                        },
+                        A: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 45
                         }
                     }
                 },
-                {
-                    opcode: 'ground',
-                    text: 'ground sensor [N]',
-                    blockType: BlockType.REPORTER,
+				{
+                    opcode: 'setOdomoter',
+                    text: 'set odometer [N] [O] [P]',
+                    blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 90
+                        },
+                        O: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        P: {
                             type: ArgumentType.NUMBER,
                             defaultValue: 0
                         }
                     }
                 },
-                {
-                    opcode: 'distance',
-                    text: 'distance [S]',
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                        S: {
-                            type: ArgumentType.STRING,
-                            menu: 'sensors',
-                            defaultValue: 'front'
-                        }
-                    }
-                },
-                {
-                    opcode: 'angle',
-                    text: 'angle [S]',
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                        S: {
-                            type: ArgumentType.STRING,
-                            menu: 'angles',
-                            defaultValue: 'front'
-                        }
-                    }
-                },
-                {
-                    opcode: 'touching',
-                    text: 'object detected [S]',
-                    blockType: BlockType.HAT,
-                    arguments: {
-                        S: {
-                            type: ArgumentType.STRING,
-                            menu: 'sensors',
-                            defaultValue: 'front'
-                        }
-                    }
-                },
 				{
-                    opcode: 'notouching',
-                    text: 'no object[S]',
-                    blockType: BlockType.HAT,
-                    arguments: {
-                        S: {
-                            type: ArgumentType.STRING,
-                            menu: 'sensors',
-                            defaultValue: 'front'
-                        }
-                    }
-                },
-                {
-                    opcode: 'touchingThreshold',
-                    text: 'object detected [S] [N]',
-                    blockType: BlockType.HAT,
-                    arguments: {
-                        S: {
-                            type: ArgumentType.STRING,
-                            menu: 'sensors2',
-                            defaultValue: 'front'
-                        },
-                        N: {
-                            type: ArgumentType.STRING,
-							menu: 'nearfar',
-							defaultValue: 'near'
-                        }
-                    }
-                },
-                {
                     opcode: 'leds',
                     text: 'leds RGB [L] [R] [G] [B]',
                     blockType: BlockType.COMMAND,
@@ -1309,163 +1256,8 @@ class Scratch3ThymioBlocks {
                     opcode: 'clearLeds',
                     text: 'leds clear',
                     blockType: BlockType.COMMAND
-                },
-                {
-                    opcode: 'arc',
-                    text: 'circle radius [R] angle [A]',
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        R: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 150
-                        },
-                        A: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 45
-                        }
-                    }
-                },
-                {
-                    opcode: 'soundSystem',
-                    text: 'play system sound [S]',
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        S: {
-                            type: ArgumentType.STRING,
-                            menu: 'sounds',
-                            defaultValue: 1
-                        }
-                    }
-                },
-                {
-                    opcode: 'soundFreq',
-                    text: 'play note [N] during [S]s',
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        N: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 440
-                        },
-                        S: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 1
-                        }
-                    }
-                },
-                {
-                    opcode: 'soundPlaySd',
-                    text: 'play sound SD [N]',
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        N: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        }
-                    }
-                },
-                {
-                    opcode: 'soundRecord',
-                    text: 'record sound [N]',
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        N: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        }
-                    }
-                },
-                {
-                    opcode: 'soundReplay',
-                    text: 'replay sound [N]',
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        N: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        }
-                    }
-                },
-                {
-                    opcode: 'proxHorizontal',
-                    text: 'proximity sensors',
-                    blockType: BlockType.REPORTER
-                },
-                {
-                    opcode: 'proxGroundDelta',
-                    text: 'ground sensors',
-                    blockType: BlockType.REPORTER 
-                },
-                {
-                    opcode: 'micIntensity',
-                    text: 'sound level',
-                    blockType: BlockType.REPORTER
-                },
-                {
-                    opcode: 'soundDetected',
-                    text: 'sound detected',
-                    blockType: BlockType.HAT
-                },
-                {
-                    opcode: 'bump',
-                    text: 'tap',
-                    blockType: BlockType.HAT
-                },
-                {
-                    opcode: 'tilt',
-                    text: 'tilt on [T]',
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                        T: {
-                            type: ArgumentType.STRING,
-                            menu: 'tilts',
-                            defaultValue: 'front-back'
-                        }
-                    }
-                },
-                {
-                    opcode: 'setOdomoter',
-                    text: 'set odometer [N] [O] [P]',
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        N: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 90
-                        },
-                        O: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        },
-                        P: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        }
-                    }
-                },
-                {
-                    opcode: 'odometer',
-                    text: 'odometer [O]',
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                        O: {
-                            type: ArgumentType.STRING,
-                            menu: 'odo',
-                            defaultValue: 'direction'
-                        }
-                    }
-                },
-                {
-                    opcode: 'motor',
-                    text: 'measure motor [M]',
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                        M: {
-                            type: ArgumentType.STRING,
-                            menu: 'leftright',
-                            defaultValue: 'left'
-                        }
-                    }
-                },
-                {
+                },               
+				{
                     opcode: 'nextDial',
                     text: 'leds next dial [L]',
                     blockType: BlockType.COMMAND,
@@ -1630,6 +1422,239 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
+				{
+                    opcode: 'soundSystem',
+                    text: 'play system sound [S]',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        S: {
+                            type: ArgumentType.STRING,
+                            menu: 'sounds',
+                            defaultValue: 1
+                        }
+                    }
+                },
+                {
+                    opcode: 'soundFreq',
+                    text: 'play note [N] during [S]s',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        N: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 440
+                        },
+                        S: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 1
+                        }
+                    }
+                },
+                {
+                    opcode: 'soundPlaySd',
+                    text: 'play sound SD [N]',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        N: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        }
+                    }
+                },
+                {
+                    opcode: 'soundRecord',
+                    text: 'record sound [N]',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        N: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        }
+                    }
+                },
+                {
+                    opcode: 'soundReplay',
+                    text: 'replay sound [N]',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        N: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        }
+                    }
+                },
+				{
+                    opcode: 'whenButton',
+                    text: 'when button [B]',
+                    blockType: BlockType.HAT,
+                    arguments: {
+                        B: {
+                            type: ArgumentType.STRING,
+                            menu: 'buttons',
+                            defaultValue: 'center'
+                        }
+                    }
+                },
+				{
+                    opcode: 'touching',
+                    text: 'object detected [S]',
+                    blockType: BlockType.HAT,
+                    arguments: {
+                        S: {
+                            type: ArgumentType.STRING,
+                            menu: 'sensors',
+                            defaultValue: 'front'
+                        }
+                    }
+                },
+				{
+                    opcode: 'notouching',
+                    text: 'no object[S]',
+                    blockType: BlockType.HAT,
+                    arguments: {
+                        S: {
+                            type: ArgumentType.STRING,
+                            menu: 'sensors',
+                            defaultValue: 'front'
+                        }
+                    }
+                },
+                {
+                    opcode: 'touchingThreshold',
+                    text: 'object detected [S] [N]',
+                    blockType: BlockType.HAT,
+                    arguments: {
+                        S: {
+                            type: ArgumentType.STRING,
+                            menu: 'sensors2',
+                            defaultValue: 'front'
+                        },
+                        N: {
+                            type: ArgumentType.STRING,
+							menu: 'nearfar',
+							defaultValue: 'near'
+                        }
+                    }
+                },
+				{
+                    opcode: 'bump',
+                    text: 'tap',
+                    blockType: BlockType.HAT
+                },
+				{
+                    opcode: 'soundDetected',
+                    text: 'sound detected',
+                    blockType: BlockType.HAT
+                },
+				{
+                    opcode: 'valButton',
+                    text: 'button [B]',
+                    blockType: BlockType.BOOLEAN,
+                    arguments: {
+                        B: {
+                            type: ArgumentType.STRING,
+                            menu: 'buttons',
+                            defaultValue: 'center'
+                        }
+                    }
+                },				
+				{
+                    opcode: 'proximity',
+                    text: 'proximity sensor [N]',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        N: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 2
+                        }
+                    }
+                },
+				{
+                    opcode: 'proxHorizontal',
+                    text: 'proximity sensors',
+                    blockType: BlockType.REPORTER
+                },
+                {
+                    opcode: 'ground',
+                    text: 'ground sensor [N]',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        N: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        }
+                    }
+                },
+				{
+                    opcode: 'proxGroundDelta',
+                    text: 'ground sensors',
+                    blockType: BlockType.REPORTER 
+                },
+                {
+                    opcode: 'distance',
+                    text: 'distance [S]',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        S: {
+                            type: ArgumentType.STRING,
+                            menu: 'sensors',
+                            defaultValue: 'front'
+                        }
+                    }
+                },
+                {
+                    opcode: 'angle',
+                    text: 'angle [S]',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        S: {
+                            type: ArgumentType.STRING,
+                            menu: 'angles',
+                            defaultValue: 'front'
+                        }
+                    }
+                },
+                
+                {
+                    opcode: 'tilt',
+                    text: 'tilt on [T]',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        T: {
+                            type: ArgumentType.STRING,
+                            menu: 'tilts',
+                            defaultValue: 'front-back'
+                        }
+                    }
+                },  
+                {
+                    opcode: 'micIntensity',
+                    text: 'sound level',
+                    blockType: BlockType.REPORTER
+                },              
+                {
+                    opcode: 'odometer',
+                    text: 'odometer [O]',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        O: {
+                            type: ArgumentType.STRING,
+                            menu: 'odo',
+                            defaultValue: 'direction'
+                        }
+                    }
+                },
+                {
+                    opcode: 'motor',
+                    text: 'measure motor [M]',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        M: {
+                            type: ArgumentType.STRING,
+                            menu: 'leftright',
+                            defaultValue: 'left'
+                        }
+                    }
+                }                
                 /*{
                     opcode: 'emit',
                     text: 'emit [N]',
@@ -1645,31 +1670,7 @@ class Scratch3ThymioBlocks {
                     opcode: 'receive',
                     text: 'receive',
                     blockType: BlockType.REPORTER
-                },*/
-                {
-                    opcode: 'whenButton',
-                    text: 'when button [B]',
-                    blockType: BlockType.HAT,
-                    arguments: {
-                        B: {
-                            type: ArgumentType.STRING,
-                            menu: 'buttons',
-                            defaultValue: 'center'
-                        }
-                    }
-                },
-				{
-                    opcode: 'valButton',
-                    text: 'button [B]',
-                    blockType: BlockType.BOOLEAN,
-                    arguments: {
-                        B: {
-                            type: ArgumentType.STRING,
-                            menu: 'buttons',
-                            defaultValue: 'center'
-                        }
-                    }
-                }
+                },*/				
             ],
             menus: {
                 leftrightall: ['left', 'right', 'all'],
