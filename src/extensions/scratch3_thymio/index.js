@@ -551,6 +551,29 @@ class Thymio {
         }
         return false;
     }
+	notouching (sensor) {
+        if (sensor === 'front') {
+            let value = 0;
+            for (let i = 0; i < 5; i++) {
+                value = value + parseInt(this.cachedValues[17 + i], 10);
+            }
+            if (value > 0) {
+                return false;
+            }
+            return true;
+        } else if (sensor === 'back') {
+            const value = parseInt(this.cachedValues[22], 10) + parseInt(this.cachedValues[23], 10);
+            if (value > 0) {
+                return false;
+            }
+            return true;
+        }
+        const value = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
+        if (value > 50) {
+            return false;
+        }
+        return true;
+    }
     touchingThreshold (sensor, threshold) {
         let limit = 0;
 		if (threshold === 'far')
@@ -820,7 +843,7 @@ class Thymio {
         return false;
     }
     bump () {
-        const value = 8;
+        const value = 10;
         const num = this.cachedValues[1];
         const acc0 = (((num >> 10) % 32) - 16) * 2;
         const acc1 = (((num >> 5) % 32) - 16) * 2;
@@ -1153,6 +1176,18 @@ class Scratch3ThymioBlocks {
                 {
                     opcode: 'touching',
                     text: 'object detected [S]',
+                    blockType: BlockType.HAT,
+                    arguments: {
+                        S: {
+                            type: ArgumentType.STRING,
+                            menu: 'sensors',
+                            defaultValue: 'front'
+                        }
+                    }
+                },
+				{
+                    opcode: 'notouching',
+                    text: 'no object[S]',
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1770,6 +1805,9 @@ class Scratch3ThymioBlocks {
     }
     touching (args) {
         return this.thymio.touching(args.S);
+    }
+	notouching (args) {
+        return this.thymio.notouching(args.S);
     }
     touchingThreshold (args) {
         return this.thymio.touchingThreshold(args.S, args.N);
