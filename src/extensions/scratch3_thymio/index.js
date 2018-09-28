@@ -1560,10 +1560,10 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-                {
+                /*{
                     opcode: 'emit',
                     text: 'emit [N]',
-                    blockType: BlockType.REPORTER,
+                    blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
                             type: ArgumentType.NUMBER,
@@ -1575,7 +1575,7 @@ class Scratch3ThymioBlocks {
                     opcode: 'receive',
                     text: 'receive',
                     blockType: BlockType.REPORTER
-                },
+                },*/
                 {
                     opcode: 'whenButton',
                     text: 'when button [B]',
