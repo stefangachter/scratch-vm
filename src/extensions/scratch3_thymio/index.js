@@ -1673,10 +1673,27 @@ class Scratch3ThymioBlocks {
                 },*/				
             ],
             menus: {
-                leftrightall: ['left', 'right', 'all'],
-                leftright: ['left', 'right'],
-                sensors: ['front', 'back', 'ground'],
-				sensors2: ['left', 'front', 'right', 'back', 'ground'],
+                leftrightall: [
+					{text:'left', value: 'left'},
+					{text:'right', value: 'right'},
+					{text:'all', value: 'all'}
+				],
+                leftright: [
+					{text:'left', value: 'left'},
+					{text:'right', value: 'right'}
+				],
+                sensors: [
+					{text:'front', value: 'front'},
+					{text:'back', value: 'back'},
+					{text:'ground', value: 'ground'}
+				],
+				sensors2: [
+					{text:'left', value: 'left'},
+					{text:'front', value: 'front'},
+					{text:'right', value: 'right'},
+					{text:'back', value: 'back'},
+					{text:'ground', value: 'ground'}
+				],
                 proxsensors: [
                     {text: 'front far left', value: 0},
                     {text: 'front left', value: 1},
@@ -1686,13 +1703,40 @@ class Scratch3ThymioBlocks {
                     {text: 'back left', value: 5},
                     {text: 'back right', value: 6}
                 ],
-                light: ['all', 'top', 'bottom', 'bottom-left', 'bottom-right'],
-                angles: ['front', 'back', 'ground'],
+                light: [
+					{text:'all', value: 'all'},
+					{text:'top', value: 'top'},
+					{text:'bottom', value: 'bottom'},
+					{text:'bottom-left', value: 'bottom-left'},
+					{text:'bottom-right', value: 'bottom-right'}
+				],
+                angles: [
+					{text:'front', value: 'front'},
+					{text:'back', value: 'back'},
+					{text:'ground', value: 'ground'}
+				],
                 sounds: ['0', '1', '2', '3', '4', '5', '6', '7'],
-                odo: ['direction', 'x', 'y'],
-                tilts: ['front-back', 'top-bottom', 'left-right'],
-                buttons: ['center', 'front', 'back', 'left', 'right'],
-				nearfar: ['near', 'far']
+                odo: [
+					{text:'direction', value: 'direction'},
+					{text:'x', value: 'x'},
+					{text:'y', value: 'y'}
+				],
+                tilts: [
+					{text:'front-back', value: 'front-back'},
+					{text:'top-bottom', value: 'top-bottom'},
+					{text:'left-right', value: 'left-right'}
+				],
+                buttons: [
+					{text:'center', value: 'center'},
+					{text:'front', value: 'front'},
+					{text:'back', value: 'back'},
+					{text:'left', value: 'left'},
+					{text:'right', value: 'right'}
+				],
+				nearfar: [
+					{text:'near', value: 'near'},
+					{text:'far', value: 'far'}
+				]
             }
         };
     }
