@@ -1061,7 +1061,7 @@ class Scratch3ThymioBlocks {
             blocks: [
                 {
                     opcode: 'setMotor',
-                    text: 'motor speed [M] [N]',
+                    text: 'moteur [M] [N]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         M: {
@@ -1077,12 +1077,12 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'stopMotors',
-                    text: 'stop motors',
+                    text: 'stop moteurs',
                     blockType: BlockType.COMMAND
                 },
                 {
                     opcode: 'move',
-                    text: 'move [N]',
+                    text: 'avancer [N]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1093,7 +1093,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'moveWithSpeed',
-                    text: 'move [N] with speed [S]',
+                    text: 'avancer [N] avec vitesse [S]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1108,7 +1108,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'moveWithTime',
-                    text: 'move [N] in [S]s',
+                    text: 'avancer [N] en [S]s',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1123,7 +1123,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turn',
-                    text: 'turn [N]',
+                    text: 'tourner [N]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1134,7 +1134,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turnWithSpeed',
-                    text: 'turn [N] with speed [S]',
+                    text: 'tourner [N] avec vitesse [S]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1149,7 +1149,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turnWithTime',
-                    text: 'turn [N] in [S]s',
+                    text: 'tourner [N] en [S]s',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1164,7 +1164,7 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'arc',
-                    text: 'circle radius [R] angle [A]',
+                    text: 'cercle rayon [R] angle [A]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         R: {
@@ -1179,7 +1179,7 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'setOdomoter',
-                    text: 'set odometer [N] [O] [P]',
+                    text: 'odomètre [N] [O] [P]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1198,7 +1198,7 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'leds',
-                    text: 'leds RGB [L] [R] [G] [B]',
+                    text: 'leds RVB [L] [R] [G] [B]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1222,7 +1222,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'setLeds',
-                    text: 'leds set color [C] on [L]',
+                    text: 'leds fixer couleur [C] sur [L]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1238,7 +1238,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'changeLeds',
-                    text: 'leds change color [C] on [L]',
+                    text: 'leds augmenter couleur [C] sur [L]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1254,12 +1254,12 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'clearLeds',
-                    text: 'leds clear',
+                    text: 'éteindre leds',
                     blockType: BlockType.COMMAND
                 },               
 				{
                     opcode: 'nextDial',
-                    text: 'leds next dial [L]',
+                    text: 'led cadran suivante [L]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1271,7 +1271,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsCircle',
-                    text: 'leds dial all [A] [B] [C] [D] [E] [F] [G] [H]',
+                    text: 'leds cadran toutes [A] [B] [C] [D] [E] [F] [G] [H]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1310,7 +1310,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsProxH',
-                    text: 'leds sensors h [A] [B] [C] [D] [E] [F] [G] [H]',
+                    text: 'leds capteurs horiz. [A] [B] [C] [D] [E] [F] [G] [H]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1349,7 +1349,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsProxV',
-                    text: 'leds sensors v [A] [B]',
+                    text: 'leds capteurs dessous [A] [B]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1364,7 +1364,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsButtons',
-                    text: 'leds buttons [A] [B] [C] [D]',
+                    text: 'leds boutons [A] [B] [C] [D]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1387,7 +1387,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsTemperature',
-                    text: 'leds temperature [A] [B]',
+                    text: 'leds température [A] [B]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1413,7 +1413,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsSound',
-                    text: 'leds sound [A]',
+                    text: 'leds son [A]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1424,7 +1424,7 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'soundSystem',
-                    text: 'play system sound [S]',
+                    text: 'jouer son système [S]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         S: {
@@ -1436,7 +1436,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundFreq',
-                    text: 'play note [N] during [S]s',
+                    text: 'jouer note [N] pendant [S]s',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1451,7 +1451,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundPlaySd',
-                    text: 'play sound SD [N]',
+                    text: 'jouer son SD [N]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1462,7 +1462,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundRecord',
-                    text: 'record sound [N]',
+                    text: 'enregistrer son [N]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1473,7 +1473,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundReplay',
-                    text: 'replay sound [N]',
+                    text: 'rejouer son [N]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1484,7 +1484,7 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'whenButton',
-                    text: 'when button [B]',
+                    text: 'bouton [B]',
                     blockType: BlockType.HAT,
                     arguments: {
                         B: {
@@ -1496,7 +1496,7 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'touching',
-                    text: 'object detected [S]',
+                    text: 'objet détecté [S]',
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1508,7 +1508,7 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'notouching',
-                    text: 'no object[S]',
+                    text: 'pas d\'objet[S]',
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1520,7 +1520,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'touchingThreshold',
-                    text: 'object detected [S] [N]',
+                    text: 'objet détecté [S] [N]',
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1537,17 +1537,17 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'bump',
-                    text: 'tap',
+                    text: 'choc',
                     blockType: BlockType.HAT
                 },
 				{
                     opcode: 'soundDetected',
-                    text: 'sound detected',
+                    text: 'bruit détecté',
                     blockType: BlockType.HAT
                 },
 				{
                     opcode: 'valButton',
-                    text: 'button [B]',
+                    text: 'bouton [B]',
                     blockType: BlockType.BOOLEAN,
                     arguments: {
                         B: {
@@ -1559,7 +1559,7 @@ class Scratch3ThymioBlocks {
                 },				
 				{
                     opcode: 'proximity',
-                    text: 'proximity sensor [N]',
+                    text: 'capteur horizontal [N]',
                     blockType: BlockType.REPORTER,
                     arguments: {
                         N: {
@@ -1570,12 +1570,12 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'proxHorizontal',
-                    text: 'proximity sensors',
+                    text: 'capteurs horizontaux',
                     blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'ground',
-                    text: 'ground sensor [N]',
+                    text: 'capteur dessous  [N]',
                     blockType: BlockType.REPORTER,
                     arguments: {
                         N: {
@@ -1586,7 +1586,7 @@ class Scratch3ThymioBlocks {
                 },
 				{
                     opcode: 'proxGroundDelta',
-                    text: 'ground sensors',
+                    text: 'capteurs dessous',
                     blockType: BlockType.REPORTER 
                 },
                 {
@@ -1616,7 +1616,7 @@ class Scratch3ThymioBlocks {
                 
                 {
                     opcode: 'tilt',
-                    text: 'tilt on [T]',
+                    text: 'inclinaison [T]',
                     blockType: BlockType.REPORTER,
                     arguments: {
                         T: {
@@ -1628,12 +1628,12 @@ class Scratch3ThymioBlocks {
                 },  
                 {
                     opcode: 'micIntensity',
-                    text: 'sound level',
+                    text: 'niveau sonore',
                     blockType: BlockType.REPORTER
                 },              
                 {
                     opcode: 'odometer',
-                    text: 'odometer [O]',
+                    text: 'odomètre [O]',
                     blockType: BlockType.REPORTER,
                     arguments: {
                         O: {
@@ -1645,7 +1645,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'motor',
-                    text: 'measure motor [M]',
+                    text: 'mesure vit. moteur [M]',
                     blockType: BlockType.REPORTER,
                     arguments: {
                         M: {
@@ -1674,46 +1674,46 @@ class Scratch3ThymioBlocks {
             ],
             menus: {
                 leftrightall: [
-					{text:'left', value: 'left'},
-					{text:'right', value: 'right'},
-					{text:'all', value: 'all'}
+					{text:'gauche', value: 'left'},
+					{text:'droite', value: 'right'},
+					{text:'tous', value: 'all'}
 				],
                 leftright: [
-					{text:'left', value: 'left'},
-					{text:'right', value: 'right'}
+					{text:'gauche', value: 'left'},
+					{text:'droite', value: 'right'}
 				],
                 sensors: [
-					{text:'front', value: 'front'},
-					{text:'back', value: 'back'},
-					{text:'ground', value: 'ground'}
+					{text:'devant', value: 'front'},
+					{text:'derrière', value: 'back'},
+					{text:'dessous', value: 'ground'}
 				],
 				sensors2: [
-					{text:'left', value: 'left'},
-					{text:'front', value: 'front'},
-					{text:'right', value: 'right'},
-					{text:'back', value: 'back'},
-					{text:'ground', value: 'ground'}
+					{text:'gauche', value: 'left'},
+					{text:'devant', value: 'front'},
+					{text:'droite', value: 'right'},
+					{text:'derrière', value: 'back'},
+					{text:'dessous', value: 'ground'}
 				],
                 proxsensors: [
-                    {text: 'front far left', value: 0},
-                    {text: 'front left', value: 1},
-                    {text: 'front center', value: 2},
-                    {text: 'front right', value: 3},
-                    {text: 'front far right', value: 4},
-                    {text: 'back left', value: 5},
-                    {text: 'back right', value: 6}
+                    {text: 'devant extrême gauche', value: 0},
+                    {text: 'devant gauche', value: 1},
+                    {text: 'devant centre', value: 2},
+                    {text: 'devant droite', value: 3},
+                    {text: 'devant extrême droite', value: 4},
+                    {text: 'derrière gauche', value: 5},
+                    {text: 'derrière droite', value: 6}
                 ],
                 light: [
-					{text:'all', value: 'all'},
-					{text:'top', value: 'top'},
-					{text:'bottom', value: 'bottom'},
-					{text:'bottom-left', value: 'bottom-left'},
-					{text:'bottom-right', value: 'bottom-right'}
+					{text:'tout', value: 'all'},
+					{text:'dessus', value: 'top'},
+					{text:'dessous', value: 'bottom'},
+					{text:'dessous-gauche', value: 'bottom-left'},
+					{text:'dessous-droite', value: 'bottom-right'}
 				],
                 angles: [
-					{text:'front', value: 'front'},
-					{text:'back', value: 'back'},
-					{text:'ground', value: 'ground'}
+					{text:'devant', value: 'front'},
+					{text:'derrière', value: 'back'},
+					{text:'dessous', value: 'ground'}
 				],
                 sounds: ['0', '1', '2', '3', '4', '5', '6', '7'],
                 odo: [
@@ -1722,20 +1722,20 @@ class Scratch3ThymioBlocks {
 					{text:'y', value: 'y'}
 				],
                 tilts: [
-					{text:'front-back', value: 'front-back'},
-					{text:'top-bottom', value: 'top-bottom'},
-					{text:'left-right', value: 'left-right'}
+					{text:'devant-derrière', value: 'front-back'},
+					{text:'dessus-dessous', value: 'top-bottom'},
+					{text:'gauche-droite à plat', value: 'left-right'}
 				],
                 buttons: [
-					{text:'center', value: 'center'},
-					{text:'front', value: 'front'},
-					{text:'back', value: 'back'},
-					{text:'left', value: 'left'},
-					{text:'right', value: 'right'}
+					{text:'centrale', value: 'center'},
+					{text:'devant', value: 'front'},
+					{text:'derrière', value: 'back'},
+					{text:'gauche', value: 'left'},
+					{text:'droite', value: 'right'}
 				],
 				nearfar: [
-					{text:'near', value: 'near'},
-					{text:'far', value: 'far'}
+					{text:'proche', value: 'near'},
+					{text:'loin', value: 'far'}
 				]
             }
         };
