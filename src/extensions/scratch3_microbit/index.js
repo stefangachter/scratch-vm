@@ -74,6 +74,11 @@ class MicroBit {
         this._runtime.registerPeripheralExtension(extensionId, this);
 
         /**
+         * The id of the extension this peripheral belongs to.
+         */
+        this._extensionId = extensionId;
+
+        /**
          * The most recently received value for each sensor.
          * @type {Object.<string, number>}
          * @private
@@ -200,7 +205,7 @@ class MicroBit {
      * Called by the runtime when user wants to scan for a peripheral.
      */
     scan () {
-        this._ble = new BLE(this._runtime, {
+        this._ble = new BLE(this._runtime, this._extensionId, {
             filters: [
                 {services: [BLEUUID.service]}
             ]
@@ -620,7 +625,7 @@ class Scratch3MicroBitBlocks {
                     opcode: 'displayText',
                     text: formatMessage({
                         id: 'microbit.displayText',
-                        default: 'display [TEXT]',
+                        default: 'display text [TEXT]',
                         description: 'display text on the micro:bit display'
                     }),
                     blockType: BlockType.COMMAND,
@@ -703,7 +708,7 @@ class Scratch3MicroBitBlocks {
                     opcode: 'whenPinConnected',
                     text: formatMessage({
                         id: 'microbit.whenPinConnected',
-                        default: 'when pin [PIN] connected test',
+                        default: 'when pin [PIN] connected',
                         description: 'when the pin detects a connection to Earth/Ground'
 
                     }),
@@ -751,11 +756,11 @@ class Scratch3MicroBitBlocks {
      */
     isButtonPressed (args) {
         if (args.BTN === 'any') {
-            return this._peripheral.buttonA | this._peripheral.buttonB;
+            return (this._peripheral.buttonA | this._peripheral.buttonB) !== 0;
         } else if (args.BTN === 'A') {
-            return this._peripheral.buttonA;
+            return this._peripheral.buttonA !== 0;
         } else if (args.BTN === 'B') {
-            return this._peripheral.buttonB;
+            return this._peripheral.buttonB !== 0;
         }
         return false;
     }
@@ -783,7 +788,7 @@ class Scratch3MicroBitBlocks {
      * @return {Promise} - a Promise that resolves after a tick.
      */
     displaySymbol (args) {
-        const symbol = cast.toString(args.MATRIX);
+        const symbol = cast.toString(args.MATRIX).replace(/\s/g, '');
         const reducer = (accumulator, c, index) => {
             const value = (c === '0') ? accumulator : accumulator + Math.pow(2, index);
             return value;
@@ -808,17 +813,22 @@ class Scratch3MicroBitBlocks {
     /**
      * Display text on the 5x5 LED matrix.
      * @param {object} args - the block's arguments.
-     * @return {Promise} - a Promise that resolves after a tick.
+     * @return {Promise} - a Promise that resolves after the text is done printing.
      * Note the limit is 19 characters
+     * The print time is calculated by multiplying the number of horizontal pixels
+     * by the default scroll delay of 120ms.
+     * The number of horizontal pixels = 6px for each character in the string,
+     * 1px before the string, and 5px after the string.
      */
     displayText (args) {
         const text = String(args.TEXT).substring(0, 19);
         if (text.length > 0) this._peripheral.displayText(text);
+        const yieldDelay = 120 * ((6 * text.length) + 6);
 
         return new Promise(resolve => {
             setTimeout(() => {
                 resolve();
-            }, BLESendInterval);
+            }, yieldDelay);
         });
     }
 

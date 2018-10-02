@@ -333,6 +333,8 @@ class WeDo2Motor {
         const timeoutID = setTimeout(() => {
             if (this._pendingTimeoutId === timeoutID) {
                 this._pendingTimeoutId = null;
+                this._pendingTimeoutStartTime = null;
+                this._pendingTimeoutDelay = null;
             }
             callback();
         }, delay);
@@ -356,6 +358,11 @@ class WeDo2 {
          */
         this._runtime = runtime;
         this._runtime.on('PROJECT_STOP_ALL', this.stopAll.bind(this));
+
+        /**
+         * The id of the extension this peripheral belongs to.
+         */
+        this._extensionId = extensionId;
 
         /**
          * A list of the ids of the motors or sensors in ports 1 and 2.
@@ -539,17 +546,15 @@ class WeDo2 {
      */
     stopAll () {
         if (!this.isConnected()) return;
-        this.stopTone()
-            .then(() => { // TODO: Promise?
-                this.stopAllMotors();
-            });
+        this.stopTone();
+        this.stopAllMotors();
     }
 
     /**
      * Called by the runtime when user wants to scan for a WeDo 2.0 peripheral.
      */
     scan () {
-        this._ble = new BLE(this._runtime, {
+        this._ble = new BLE(this._runtime, this._extensionId, {
             filters: [{
                 services: [BLEService.DEVICE_SERVICE]
             }],
@@ -676,19 +681,13 @@ class WeDo2 {
      * @private
      */
     _onConnect () {
-        // set LED input mode to RGB
-        this.setLEDMode()
-            .then(() => { // TODO: Promise?
-                // set LED to blue
-                this.setLED(0x0000FF);
-            })
-            .then(() => { // TODO: Promise?
-                this._ble.startNotifications(
-                    BLEService.DEVICE_SERVICE,
-                    BLECharacteristic.ATTACHED_IO,
-                    this._onMessage
-                );
-            });
+        this.setLEDMode();
+        this.setLED(0x0000FF);
+        this._ble.startNotifications(
+            BLEService.DEVICE_SERVICE,
+            BLECharacteristic.ATTACHED_IO,
+            this._onMessage
+        );
     }
 
     /**
@@ -762,14 +761,12 @@ class WeDo2 {
                 true
             );
 
-            this.send(BLECharacteristic.INPUT_COMMAND, cmd)
-                .then(() => { // TODO: Promise?
-                    this._ble.startNotifications(
-                        BLEService.IO_SERVICE,
-                        BLECharacteristic.INPUT_VALUES,
-                        this._onMessage
-                    );
-                });
+            this.send(BLECharacteristic.INPUT_COMMAND, cmd);
+            this._ble.startNotifications(
+                BLEService.IO_SERVICE,
+                BLECharacteristic.INPUT_VALUES,
+                this._onMessage
+            );
         }
     }
 
