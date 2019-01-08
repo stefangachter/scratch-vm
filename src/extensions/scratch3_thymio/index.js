@@ -21,6 +21,7 @@ const BlockType = require('../../extension-support/block-type');
 const Timer = require('../../util/timer');
 const Cast = require('../../util/cast');
 const log = require('../../util/log');
+const formatMessage = require('format-message');
 
 const aeslString = require('./aesl');
 const blockIconURI = require('./icon');
@@ -1036,6 +1037,10 @@ class Thymio {
  * Scratch 3.0 blocks to interact with a Thymio-II robot.
  */
 class Scratch3ThymioBlocks {
+    static get DEFAULT_LANG () {
+        return 'en';
+    }
+
     /**
      * Construct a set of Thymio blocks.
      * @param {Runtime} runtime - the Scratch 3.0 runtime.
@@ -1050,9 +1055,29 @@ class Scratch3ThymioBlocks {
         this.thymio = new Thymio();
     }
     /**
+      * @returns {object} messages - extension messages for locale
+        It is defined by using the current browser locale or the default (en) if the language is not (yet) supported.
+    */
+    getMessagesForLocale () {
+        const locale = formatMessage.setup().locale;
+
+        let messages;
+        try {
+            messages = require(`./lang/${locale}`);
+        } catch (ex) {
+            log.warn(`Locale "${locale}" is not (yet) supported for this extension.`);
+            log.warn(`Falling back to ${Scratch3ThymioBlocks.DEFAULT_LANG}`);
+
+            messages = require(`./lang/${Scratch3ThymioBlocks.DEFAULT_LANG}`);
+        }
+        return messages;
+    }
+    /**
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo () {
+        const messages = this.getMessagesForLocale();
+
         return {
             id: 'thymio',
             name: 'Thymio',
