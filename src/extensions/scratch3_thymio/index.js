@@ -168,12 +168,12 @@ class Thymio {
         const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/${action}/${params}`;
 
         if (typeof callback === 'function') {
-            xmlhttp.onreadystatechange  = () => {
-				if (xmlhttp.readyState !== 4) {
-					return;
-				}
-			callback(xmlhttp);
-			};
+            xmlhttp.onreadystatechange = () => {
+                if (xmlhttp.readyState !== 4) {
+                    return;
+                }
+                callback(xmlhttp);
+            };
         }
 
         xmlhttp.open('GET', url, true);
@@ -551,7 +551,7 @@ class Thymio {
         }
         return false;
     }
-	notouching (sensor) {
+    notouching (sensor) {
         if (sensor === 'front') {
             let value = 0;
             for (let i = 0; i < 5; i++) {
@@ -576,38 +576,37 @@ class Thymio {
     }
     touchingThreshold (sensor, threshold) {
         let limit = 0;
-		if (threshold === 'far')
-			limit=1000;
-		else
-			limit=3000;
-		if (sensor === 'front') {
-                if (parseInt(this.cachedValues[19], 10) > limit) {
-                    return true;
-                }
-			return false;	
+        if (threshold === 'far') {
+            limit = 1000;
+        } else {
+            limit = 3000;
+        }
+        if (sensor === 'front') {
+            if (parseInt(this.cachedValues[19], 10) > limit) {
+                return true;
             }
-		else if (sensor === 'left') {
-			if (parseInt(this.cachedValues[17], 10) > limit || parseInt(this.cachedValues[18], 10) > limit) {
-                    return true;
-				}
-				return false;			
-		}
-		else if (sensor === 'right') {
+            return false;
+        } else if (sensor === 'left') {
+            if (parseInt(this.cachedValues[17], 10) > limit || parseInt(this.cachedValues[18], 10) > limit) {
+                return true;
+            }
+            return false;
+        } else if (sensor === 'right') {
             if (parseInt(this.cachedValues[20], 10) > limit || parseInt(this.cachedValues[21], 10) > limit) {
                 return true;
-			}
-			return false;			
-		}
-		else if (sensor === 'back') {
+            }
+            return false;
+        } else if (sensor === 'back') {
             if (parseInt(this.cachedValues[22], 10) > limit || parseInt(this.cachedValues[23], 10) > limit) {
                 return true;
             }
             return false;
         }
-		if (threshold === 'far')
-			limit=50;
-		else
-			limit=600;
+        if (threshold === 'far') {
+            limit = 50;
+        } else {
+            limit = 600;
+        }
         if (parseInt(this.cachedValues[15], 10) > limit || parseInt(this.cachedValues[16], 10) > limit) {
             return true;
         }
@@ -996,7 +995,7 @@ class Thymio {
             return false;
         }
     }
-	valButton (button) {
+    valButton (button) {
         const num = parseInt(this.cachedValues[2], 10);
 
         if (button === 'center') {
@@ -1162,7 +1161,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'arc',
                     text: 'cercle rayon [R] angle [A]',
                     blockType: BlockType.COMMAND,
@@ -1177,7 +1176,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'setOdomoter',
                     text: 'odomètre [N] [O] [P]',
                     blockType: BlockType.COMMAND,
@@ -1196,7 +1195,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'leds',
                     text: 'leds RVB [L] [R] [G] [B]',
                     blockType: BlockType.COMMAND,
@@ -1256,8 +1255,8 @@ class Scratch3ThymioBlocks {
                     opcode: 'clearLeds',
                     text: 'éteindre leds',
                     blockType: BlockType.COMMAND
-                },               
-				{
+                },
+                {
                     opcode: 'nextDial',
                     text: 'led cadran suivante [L]',
                     blockType: BlockType.COMMAND,
@@ -1422,7 +1421,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'soundSystem',
                     text: 'jouer son système [S]',
                     blockType: BlockType.COMMAND,
@@ -1482,7 +1481,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'whenButton',
                     text: 'bouton [B]',
                     blockType: BlockType.HAT,
@@ -1494,7 +1493,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'touching',
                     text: 'objet détecté [S]',
                     blockType: BlockType.HAT,
@@ -1506,7 +1505,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'notouching',
                     text: 'pas d\'objet[S]',
                     blockType: BlockType.HAT,
@@ -1530,22 +1529,22 @@ class Scratch3ThymioBlocks {
                         },
                         N: {
                             type: ArgumentType.STRING,
-							menu: 'nearfar',
-							defaultValue: 'near'
+                            menu: 'nearfar',
+                            defaultValue: 'near'
                         }
                     }
                 },
-				{
+                {
                     opcode: 'bump',
                     text: 'choc',
                     blockType: BlockType.HAT
                 },
-				{
+                {
                     opcode: 'soundDetected',
                     text: 'bruit détecté',
                     blockType: BlockType.HAT
                 },
-				{
+                {
                     opcode: 'valButton',
                     text: 'bouton [B]',
                     blockType: BlockType.BOOLEAN,
@@ -1556,8 +1555,8 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'center'
                         }
                     }
-                },				
-				{
+                },
+                {
                     opcode: 'proximity',
                     text: 'capteur horizontal [N]',
                     blockType: BlockType.REPORTER,
@@ -1568,7 +1567,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'proxHorizontal',
                     text: 'capteurs horizontaux',
                     blockType: BlockType.REPORTER
@@ -1584,10 +1583,10 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'proxGroundDelta',
-                    text: 'capteurs dessous',
-                    blockType: BlockType.REPORTER 
+                    text: 'ground sensors',
+                    blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'distance',
@@ -1613,7 +1612,7 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-                
+
                 {
                     opcode: 'tilt',
                     text: 'inclinaison [T]',
@@ -1625,12 +1624,12 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'front-back'
                         }
                     }
-                },  
+                },
                 {
                     opcode: 'micIntensity',
                     text: 'niveau sonore',
                     blockType: BlockType.REPORTER
-                },              
+                },
                 {
                     opcode: 'odometer',
                     text: 'odomètre [O]',
@@ -1654,8 +1653,8 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'left'
                         }
                     }
-                }                
-                /*{
+                }
+                /* {
                     opcode: 'emit',
                     text: 'emit [N]',
                     blockType: BlockType.COMMAND,
@@ -1670,30 +1669,30 @@ class Scratch3ThymioBlocks {
                     opcode: 'receive',
                     text: 'receive',
                     blockType: BlockType.REPORTER
-                },*/				
+                },*/
             ],
             menus: {
                 leftrightall: [
-					{text:'gauche', value: 'left'},
-					{text:'droite', value: 'right'},
-					{text:'tous', value: 'all'}
-				],
+                    {text: 'left', value: 'left'},
+                    {text: 'right', value: 'right'},
+                    {text: 'all', value: 'all'}
+                ],
                 leftright: [
-					{text:'gauche', value: 'left'},
-					{text:'droite', value: 'right'}
-				],
+                    {text: 'left', value: 'left'},
+                    {text: 'right', value: 'right'}
+                ],
                 sensors: [
-					{text:'devant', value: 'front'},
-					{text:'derrière', value: 'back'},
-					{text:'dessous', value: 'ground'}
-				],
-				sensors2: [
-					{text:'gauche', value: 'left'},
-					{text:'devant', value: 'front'},
-					{text:'droite', value: 'right'},
-					{text:'derrière', value: 'back'},
-					{text:'dessous', value: 'ground'}
-				],
+                    {text: 'front', value: 'front'},
+                    {text: 'back', value: 'back'},
+                    {text: 'ground', value: 'ground'}
+                ],
+                sensors2: [
+                    {text: 'left', value: 'left'},
+                    {text: 'front', value: 'front'},
+                    {text: 'right', value: 'right'},
+                    {text: 'back', value: 'back'},
+                    {text: 'ground', value: 'ground'}
+                ],
                 proxsensors: [
                     {text: 'devant extrême gauche', value: 0},
                     {text: 'devant gauche', value: 1},
@@ -1704,39 +1703,39 @@ class Scratch3ThymioBlocks {
                     {text: 'derrière droite', value: 6}
                 ],
                 light: [
-					{text:'tout', value: 'all'},
-					{text:'dessus', value: 'top'},
-					{text:'dessous', value: 'bottom'},
-					{text:'dessous-gauche', value: 'bottom-left'},
-					{text:'dessous-droite', value: 'bottom-right'}
-				],
+                    {text: 'all', value: 'all'},
+                    {text: 'top', value: 'top'},
+                    {text: 'bottom', value: 'bottom'},
+                    {text: 'bottom-left', value: 'bottom-left'},
+                    {text: 'bottom-right', value: 'bottom-right'}
+                ],
                 angles: [
-					{text:'devant', value: 'front'},
-					{text:'derrière', value: 'back'},
-					{text:'dessous', value: 'ground'}
-				],
+                    {text: 'front', value: 'front'},
+                    {text: 'back', value: 'back'},
+                    {text: 'ground', value: 'ground'}
+                ],
                 sounds: ['0', '1', '2', '3', '4', '5', '6', '7'],
                 odo: [
-					{text:'direction', value: 'direction'},
-					{text:'x', value: 'x'},
-					{text:'y', value: 'y'}
-				],
+                    {text: 'direction', value: 'direction'},
+                    {text: 'x', value: 'x'},
+                    {text: 'y', value: 'y'}
+                ],
                 tilts: [
-					{text:'devant-derrière', value: 'front-back'},
-					{text:'dessus-dessous', value: 'top-bottom'},
-					{text:'gauche-droite à plat', value: 'left-right'}
-				],
+                    {text: 'front-back', value: 'front-back'},
+                    {text: 'top-bottom', value: 'top-bottom'},
+                    {text: 'left-right', value: 'left-right'}
+                ],
                 buttons: [
-					{text:'centrale', value: 'center'},
-					{text:'devant', value: 'front'},
-					{text:'derrière', value: 'back'},
-					{text:'gauche', value: 'left'},
-					{text:'droite', value: 'right'}
-				],
-				nearfar: [
-					{text:'proche', value: 'near'},
-					{text:'loin', value: 'far'}
-				]
+                    {text: 'center', value: 'center'},
+                    {text: 'front', value: 'front'},
+                    {text: 'back', value: 'back'},
+                    {text: 'left', value: 'left'},
+                    {text: 'right', value: 'right'}
+                ],
+                nearfar: [
+                    {text: 'near', value: 'near'},
+                    {text: 'far', value: 'far'}
+                ]
             }
         };
     }
@@ -1898,7 +1897,7 @@ class Scratch3ThymioBlocks {
     touching (args) {
         return this.thymio.touching(args.S);
     }
-	notouching (args) {
+    notouching (args) {
         return this.thymio.notouching(args.S);
     }
     touchingThreshold (args) {
@@ -2040,7 +2039,7 @@ class Scratch3ThymioBlocks {
     whenButton (args) {
         return this.thymio.whenButton(args.B);
     }
-	valButton (args) {
+    valButton (args) {
         return this.thymio.valButton(args.B);
     }
 }
