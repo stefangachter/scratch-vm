@@ -21,6 +21,7 @@ const BlockType = require('../../extension-support/block-type');
 const Timer = require('../../util/timer');
 const Cast = require('../../util/cast');
 const log = require('../../util/log');
+const formatMessage = require('format-message');
 
 const aeslString = require('./aesl');
 const blockIconURI = require('./icon');
@@ -168,12 +169,12 @@ class Thymio {
         const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/${action}/${params}`;
 
         if (typeof callback === 'function') {
-            xmlhttp.onreadystatechange  = () => {
-				if (xmlhttp.readyState !== 4) {
-					return;
-				}
-			callback(xmlhttp);
-			};
+            xmlhttp.onreadystatechange = () => {
+                if (xmlhttp.readyState !== 4) {
+                    return;
+                }
+                callback(xmlhttp);
+            };
         }
 
         xmlhttp.open('GET', url, true);
@@ -551,7 +552,7 @@ class Thymio {
         }
         return false;
     }
-	notouching (sensor) {
+    notouching (sensor) {
         if (sensor === 'front') {
             let value = 0;
             for (let i = 0; i < 5; i++) {
@@ -576,38 +577,37 @@ class Thymio {
     }
     touchingThreshold (sensor, threshold) {
         let limit = 0;
-		if (threshold === 'far')
-			limit=1000;
-		else
-			limit=3000;
-		if (sensor === 'front') {
-                if (parseInt(this.cachedValues[19], 10) > limit) {
-                    return true;
-                }
-			return false;	
+        if (threshold === 'far') {
+            limit = 1000;
+        } else {
+            limit = 3000;
+        }
+        if (sensor === 'front') {
+            if (parseInt(this.cachedValues[19], 10) > limit) {
+                return true;
             }
-		else if (sensor === 'left') {
-			if (parseInt(this.cachedValues[17], 10) > limit || parseInt(this.cachedValues[18], 10) > limit) {
-                    return true;
-				}
-				return false;			
-		}
-		else if (sensor === 'right') {
+            return false;
+        } else if (sensor === 'left') {
+            if (parseInt(this.cachedValues[17], 10) > limit || parseInt(this.cachedValues[18], 10) > limit) {
+                return true;
+            }
+            return false;
+        } else if (sensor === 'right') {
             if (parseInt(this.cachedValues[20], 10) > limit || parseInt(this.cachedValues[21], 10) > limit) {
                 return true;
-			}
-			return false;			
-		}
-		else if (sensor === 'back') {
+            }
+            return false;
+        } else if (sensor === 'back') {
             if (parseInt(this.cachedValues[22], 10) > limit || parseInt(this.cachedValues[23], 10) > limit) {
                 return true;
             }
             return false;
         }
-		if (threshold === 'far')
-			limit=50;
-		else
-			limit=600;
+        if (threshold === 'far') {
+            limit = 50;
+        } else {
+            limit = 600;
+        }
         if (parseInt(this.cachedValues[15], 10) > limit || parseInt(this.cachedValues[16], 10) > limit) {
             return true;
         }
@@ -996,7 +996,7 @@ class Thymio {
             return false;
         }
     }
-	valButton (button) {
+    valButton (button) {
         const num = parseInt(this.cachedValues[2], 10);
 
         if (button === 'center') {
@@ -1037,6 +1037,10 @@ class Thymio {
  * Scratch 3.0 blocks to interact with a Thymio-II robot.
  */
 class Scratch3ThymioBlocks {
+    static get DEFAULT_LANG () {
+        return 'en';
+    }
+
     /**
      * Construct a set of Thymio blocks.
      * @param {Runtime} runtime - the Scratch 3.0 runtime.
@@ -1051,9 +1055,29 @@ class Scratch3ThymioBlocks {
         this.thymio = new Thymio();
     }
     /**
+      * @returns {object} messages - extension messages for locale
+        It is defined by using the current browser locale or the default (en) if the language is not (yet) supported.
+    */
+    getMessagesForLocale () {
+        const locale = formatMessage.setup().locale;
+
+        let messages;
+        try {
+            messages = require(`./lang/${locale}`);
+        } catch (ex) {
+            log.warn(`Locale "${locale}" is not (yet) supported for this extension.`);
+            log.warn(`Falling back to ${Scratch3ThymioBlocks.DEFAULT_LANG}`);
+
+            messages = require(`./lang/${Scratch3ThymioBlocks.DEFAULT_LANG}`);
+        }
+        return messages;
+    }
+    /**
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo () {
+        const messages = this.getMessagesForLocale();
+
         return {
             id: 'thymio',
             name: 'Thymio',
@@ -1061,7 +1085,7 @@ class Scratch3ThymioBlocks {
             blocks: [
                 {
                     opcode: 'setMotor',
-                    text: 'moteur [M] [N]',
+                    text: messages.blocks.setMotor,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         M: {
@@ -1077,12 +1101,12 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'stopMotors',
-                    text: 'stop moteurs',
+                    text: messages.blocks.stopMotors,
                     blockType: BlockType.COMMAND
                 },
                 {
                     opcode: 'move',
-                    text: 'avancer [N]',
+                    text: messages.blocks.move,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1093,7 +1117,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'moveWithSpeed',
-                    text: 'avancer [N] avec vitesse [S]',
+                    text: messages.blocks.moveWithSpeed,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1108,7 +1132,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'moveWithTime',
-                    text: 'avancer [N] en [S]s',
+                    text: messages.blocks.moveWithTime,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1123,7 +1147,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turn',
-                    text: 'tourner [N]',
+                    text: messages.blocks.turn,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1134,7 +1158,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turnWithSpeed',
-                    text: 'tourner [N] avec vitesse [S]',
+                    text: messages.blocks.turnWithSpeed,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1149,7 +1173,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turnWithTime',
-                    text: 'tourner [N] en [S]s',
+                    text: messages.blocks.turnWithTime,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1162,9 +1186,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'arc',
-                    text: 'cercle rayon [R] angle [A]',
+                    text: messages.blocks.arc,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         R: {
@@ -1177,9 +1201,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'setOdomoter',
-                    text: 'odomètre [N] [O] [P]',
+                    text: messages.blocks.setOdomoter,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1196,9 +1220,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'leds',
-                    text: 'leds RVB [L] [R] [G] [B]',
+                    text: messages.blocks.leds,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1222,7 +1246,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'setLeds',
-                    text: 'leds fixer couleur [C] sur [L]',
+                    text: messages.blocks.setLeds,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1238,7 +1262,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'changeLeds',
-                    text: 'leds augmenter couleur [C] sur [L]',
+                    text: messages.blocks.changeLeds,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1254,12 +1278,12 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'clearLeds',
-                    text: 'éteindre leds',
+                    text: messages.blocks.clearLeds,
                     blockType: BlockType.COMMAND
-                },               
-				{
+                },
+                {
                     opcode: 'nextDial',
-                    text: 'led cadran suivante [L]',
+                    text: messages.blocks.nextDial,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1271,7 +1295,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsCircle',
-                    text: 'leds cadran toutes [A] [B] [C] [D] [E] [F] [G] [H]',
+                    text: messages.blocks.ledsCircle,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1310,7 +1334,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsProxH',
-                    text: 'leds capteurs horiz. [A] [B] [C] [D] [E] [F] [G] [H]',
+                    text: messages.blocks.ledsProxH,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1349,7 +1373,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsProxV',
-                    text: 'leds capteurs dessous [A] [B]',
+                    text: messages.blocks.ledsProxV,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1364,7 +1388,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsButtons',
-                    text: 'leds boutons [A] [B] [C] [D]',
+                    text: messages.blocks.ledsButtons,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1387,7 +1411,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsTemperature',
-                    text: 'leds température [A] [B]',
+                    text: messages.blocks.ledsTemperature,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1402,7 +1426,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsRc',
-                    text: 'leds rc [A]',
+                    text: messages.blocks.ledsRc,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1413,7 +1437,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsSound',
-                    text: 'leds son [A]',
+                    text: messages.blocks.ledsSound,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1422,9 +1446,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'soundSystem',
-                    text: 'jouer son système [S]',
+                    text: messages.blocks.soundSystem,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         S: {
@@ -1436,7 +1460,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundFreq',
-                    text: 'jouer note [N] pendant [S]s',
+                    text: messages.blocks.soundFreq,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1451,7 +1475,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundPlaySd',
-                    text: 'jouer son SD [N]',
+                    text: messages.blocks.soundPlaySd,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1462,7 +1486,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundRecord',
-                    text: 'enregistrer son [N]',
+                    text: messages.blocks.soundRecord,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1473,7 +1497,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundReplay',
-                    text: 'rejouer son [N]',
+                    text: messages.blocks.soundReplay,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1482,9 +1506,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'whenButton',
-                    text: 'bouton [B]',
+                    text: messages.blocks.whenButton,
                     blockType: BlockType.HAT,
                     arguments: {
                         B: {
@@ -1494,9 +1518,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'touching',
-                    text: 'objet détecté [S]',
+                    text: messages.blocks.touching,
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1506,9 +1530,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'notouching',
-                    text: 'pas d\'objet[S]',
+                    text: messages.blocks.notouching,
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1520,7 +1544,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'touchingThreshold',
-                    text: 'objet détecté [S] [N]',
+                    text: messages.blocks.touchingThreshold,
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1530,24 +1554,24 @@ class Scratch3ThymioBlocks {
                         },
                         N: {
                             type: ArgumentType.STRING,
-							menu: 'nearfar',
-							defaultValue: 'near'
+                            menu: 'nearfar',
+                            defaultValue: 'near'
                         }
                     }
                 },
-				{
+                {
                     opcode: 'bump',
-                    text: 'choc',
+                    text: messages.blocks.bump,
                     blockType: BlockType.HAT
                 },
-				{
+                {
                     opcode: 'soundDetected',
-                    text: 'bruit détecté',
+                    text: messages.blocks.soundDetected,
                     blockType: BlockType.HAT
                 },
-				{
+                {
                     opcode: 'valButton',
-                    text: 'bouton [B]',
+                    text: messages.blocks.valButton,
                     blockType: BlockType.BOOLEAN,
                     arguments: {
                         B: {
@@ -1556,10 +1580,10 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'center'
                         }
                     }
-                },				
-				{
+                },
+                {
                     opcode: 'proximity',
-                    text: 'capteur horizontal [N]',
+                    text: messages.blocks.proximity,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         N: {
@@ -1568,14 +1592,14 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'proxHorizontal',
-                    text: 'capteurs horizontaux',
+                    text: messages.blocks.proxHorizontal,
                     blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'ground',
-                    text: 'capteur dessous  [N]',
+                    text: messages.blocks.ground,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         N: {
@@ -1584,14 +1608,14 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'proxGroundDelta',
-                    text: 'capteurs dessous',
-                    blockType: BlockType.REPORTER 
+                    text: messages.blocks.proxGroundDelta,
+                    blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'distance',
-                    text: 'distance [S]',
+                    text: messages.blocks.distance,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         S: {
@@ -1603,7 +1627,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'angle',
-                    text: 'angle [S]',
+                    text: messages.blocks.angle,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         S: {
@@ -1613,10 +1637,10 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-                
+
                 {
                     opcode: 'tilt',
-                    text: 'inclinaison [T]',
+                    text: messages.blocks.tilt,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         T: {
@@ -1625,15 +1649,15 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'front-back'
                         }
                     }
-                },  
+                },
                 {
                     opcode: 'micIntensity',
-                    text: 'niveau sonore',
+                    text: messages.blocks.micIntensity,
                     blockType: BlockType.REPORTER
-                },              
+                },
                 {
                     opcode: 'odometer',
-                    text: 'odomètre [O]',
+                    text: messages.blocks.odometer,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         O: {
@@ -1645,7 +1669,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'motor',
-                    text: 'mesure vit. moteur [M]',
+                    text: messages.blocks.motor,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         M: {
@@ -1654,8 +1678,8 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'left'
                         }
                     }
-                }                
-                /*{
+                }
+                /* {
                     opcode: 'emit',
                     text: 'emit [N]',
                     blockType: BlockType.COMMAND,
@@ -1670,73 +1694,73 @@ class Scratch3ThymioBlocks {
                     opcode: 'receive',
                     text: 'receive',
                     blockType: BlockType.REPORTER
-                },*/				
+                },*/
             ],
             menus: {
                 leftrightall: [
-					{text:'gauche', value: 'left'},
-					{text:'droite', value: 'right'},
-					{text:'tous', value: 'all'}
-				],
+                    {text: messages.menus.leftrightall.left, value: 'left'},
+                    {text: messages.menus.leftrightall.right, value: 'right'},
+                    {text: messages.menus.leftrightall.all, value: 'all'}
+                ],
                 leftright: [
-					{text:'gauche', value: 'left'},
-					{text:'droite', value: 'right'}
-				],
+                    {text: messages.menus.leftright.left, value: 'left'},
+                    {text: messages.menus.leftright.right, value: 'right'}
+                ],
                 sensors: [
-					{text:'devant', value: 'front'},
-					{text:'derrière', value: 'back'},
-					{text:'dessous', value: 'ground'}
-				],
-				sensors2: [
-					{text:'gauche', value: 'left'},
-					{text:'devant', value: 'front'},
-					{text:'droite', value: 'right'},
-					{text:'derrière', value: 'back'},
-					{text:'dessous', value: 'ground'}
-				],
+                    {text: messages.menus.sensors.front, value: 'front'},
+                    {text: messages.menus.sensors.back, value: 'back'},
+                    {text: messages.menus.sensors.ground, value: 'ground'}
+                ],
+                sensors2: [
+                    {text: messages.menus.sensors2.left, value: 'left'},
+                    {text: messages.menus.sensors2.front, value: 'front'},
+                    {text: messages.menus.sensors2.right, value: 'right'},
+                    {text: messages.menus.sensors2.back, value: 'back'},
+                    {text: messages.menus.sensors2.ground, value: 'ground'}
+                ],
                 proxsensors: [
-                    {text: 'devant extrême gauche', value: 0},
-                    {text: 'devant gauche', value: 1},
-                    {text: 'devant centre', value: 2},
-                    {text: 'devant droite', value: 3},
-                    {text: 'devant extrême droite', value: 4},
-                    {text: 'derrière gauche', value: 5},
-                    {text: 'derrière droite', value: 6}
+                    {text: messages.menus.proxsensors.front_far_left, value: 0},
+                    {text: messages.menus.proxsensors.front_left, value: 1},
+                    {text: messages.menus.proxsensors.front_center, value: 2},
+                    {text: messages.menus.proxsensors.front_right, value: 3},
+                    {text: messages.menus.proxsensors.front_far_right, value: 4},
+                    {text: messages.menus.proxsensors.back_left, value: 5},
+                    {text: messages.menus.proxsensors.back_right, value: 6}
                 ],
                 light: [
-					{text:'tout', value: 'all'},
-					{text:'dessus', value: 'top'},
-					{text:'dessous', value: 'bottom'},
-					{text:'dessous-gauche', value: 'bottom-left'},
-					{text:'dessous-droite', value: 'bottom-right'}
-				],
+                    {text: messages.menus.light.all, value: 'all'},
+                    {text: messages.menus.light.top, value: 'top'},
+                    {text: messages.menus.light.bottom, value: 'bottom'},
+                    {text: messages.menus.light.bottom_left, value: 'bottom-left'},
+                    {text: messages.menus.light.bottom_right, value: 'bottom-right'}
+                ],
                 angles: [
-					{text:'devant', value: 'front'},
-					{text:'derrière', value: 'back'},
-					{text:'dessous', value: 'ground'}
-				],
+                    {text: messages.menus.angles.front, value: 'front'},
+                    {text: messages.menus.angles.back, value: 'back'},
+                    {text: messages.menus.angles.ground, value: 'ground'}
+                ],
                 sounds: ['0', '1', '2', '3', '4', '5', '6', '7'],
                 odo: [
-					{text:'direction', value: 'direction'},
-					{text:'x', value: 'x'},
-					{text:'y', value: 'y'}
-				],
+                    {text: messages.menus.odo.direction, value: 'direction'},
+                    {text: messages.menus.odo.x, value: 'x'},
+                    {text: messages.menus.odo.y, value: 'y'}
+                ],
                 tilts: [
-					{text:'devant-derrière', value: 'front-back'},
-					{text:'dessus-dessous', value: 'top-bottom'},
-					{text:'gauche-droite à plat', value: 'left-right'}
-				],
+                    {text: messages.menus.tilts.front_back, value: 'front-back'},
+                    {text: messages.menus.tilts.top_bottom, value: 'top-bottom'},
+                    {text: messages.menus.tilts.left_right, value: 'left-right'}
+                ],
                 buttons: [
-					{text:'centrale', value: 'center'},
-					{text:'devant', value: 'front'},
-					{text:'derrière', value: 'back'},
-					{text:'gauche', value: 'left'},
-					{text:'droite', value: 'right'}
-				],
-				nearfar: [
-					{text:'proche', value: 'near'},
-					{text:'loin', value: 'far'}
-				]
+                    {text: messages.menus.buttons.center, value: 'center'},
+                    {text: messages.menus.buttons.front, value: 'front'},
+                    {text: messages.menus.buttons.back, value: 'back'},
+                    {text: messages.menus.buttons.left, value: 'left'},
+                    {text: messages.menus.buttons.right, value: 'right'}
+                ],
+                nearfar: [
+                    {text: messages.menus.nearfar.near, value: 'near'},
+                    {text: messages.menus.nearfar.far, value: 'far'}
+                ]
             }
         };
     }
@@ -1898,7 +1922,7 @@ class Scratch3ThymioBlocks {
     touching (args) {
         return this.thymio.touching(args.S);
     }
-	notouching (args) {
+    notouching (args) {
         return this.thymio.notouching(args.S);
     }
     touchingThreshold (args) {
@@ -2040,7 +2064,7 @@ class Scratch3ThymioBlocks {
     whenButton (args) {
         return this.thymio.whenButton(args.B);
     }
-	valButton (args) {
+    valButton (args) {
         return this.thymio.valButton(args.B);
     }
 }
