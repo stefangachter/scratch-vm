@@ -26,6 +26,8 @@ const formatMessage = require('format-message');
 const aeslString = require('./aesl');
 const blockIconURI = require('./icon');
 
+const thymioApi = require('@mobsya/thymio-api');
+
 
 const clamp = function (val, min, max) {
     val = (val < min ? min : (val > max ? max : val));
