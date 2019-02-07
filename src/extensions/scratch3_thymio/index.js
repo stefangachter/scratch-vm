@@ -1,6 +1,6 @@
 /**
 * Thymio exension for Scratch 3.0
-* v 1.0 for internal use
+* v 2.0 for internal use
 * Created by Pollen Robotics on May 7, 2018
 *
 * This program is free software: you can redistribute it and/or modify
@@ -23,9 +23,9 @@ const Cast = require('../../util/cast');
 const log = require('../../util/log');
 const formatMessage = require('format-message');
 
-const aeslString = require('./aesl');
 const blockIconURI = require('./icon');
 
+const aesl = require('./aesl');
 const thymioApi = require('@mobsya/thymio-api');
 
 
@@ -72,8 +72,8 @@ const makeLedsRGBVector = function (color) {
 };
 
 class Thymio {
-    static get ASEBA_HTTP_URL () {
-        return 'http://127.0.0.1:3000';
+    static get TDM_URL () {
+        return 'ws://127.0.0.1:8597';
     }
     static get VMIN () {
         return -500;
@@ -88,148 +88,99 @@ class Thymio {
         return 32;
     }
     constructor () {
-        this.source = null;
+        this.node = null;
         this.connected = 0;
         this.eventCompleteCallback = false;
         this.cachedValues = Array();
         this._leds = [0, 0, 0];
         this._dial = -1;
 
-        this.loadAesl();
         this.connect();
     }
     /**
-     * The function subscribes to the Thymio’s SSE stream, sets an Event Listener on messages received
-     * and stores R_state variable in cachedValues
+     * The function subscribes to the TDM notification and tries to lock a Thymio Node.
+     * When locked, the aseba script is sent and the various events watched.
      */
     connect () {
-        if (this.source) {
+        if (this.node) {
             this.disconnect();
         }
 
-        const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/events`;
-        this.source = new EventSource(url);
+        log.info('Tries to connect with TDM.');
+        const client = thymioApi.createClient(Thymio.TDM_URL);
 
-        this.source.addEventListener('open', () => {
-            log.info('Connection opened with Thymio web bridge.');
-        });
-        this.source.addEventListener('message', e => {
-            const eventData = e.data.split(' ');
-            this.connected = 2;
+        client.onNodesChanged = nodes => {
+            for (const node of nodes) {
+                if (this.node === null && node.status === thymioApi.NodeStatus.available) {
+                    // We found an available node to connect to.
+                    // We try to lock it.
+                    node.lock().then(() => {
+                        log.info(`Node ${node.id} locked.`);
+                    });
+                } else if (node.status === thymioApi.NodeStatus.ready) {
+                    log.info(`Node ${node.id} ready.`);
 
-            if (eventData[0] === 'R_state_update') {
-                this.cachedValues = eventData;
-            } else {
-                log.info(`Thymio emitted: ${eventData}`);
-            }
-            // If block requires to check event message for completion, it will set eventCompleteCallback
-            if (typeof this.eventCompleteCallback === 'function') {
-                // We pass eventData to be able to read event message
-                this.eventCompleteCallback(eventData);
-            }
-        });
-        this.source.addEventListener('error', () => {
-            this.disconnect('Event stream closed');
-            this.connected = 0;
-            this.connect();
-        });
-    }
-    /**
-     * The function closes the Event Source.
-     */
-    disconnect () {
-        if (this.source) {
-            this.source.close();
-            this.source = null;
-        }
-        this.connected = 0;
-    }
-    /**
-     * The function sends code of thymio_motion.aesl to asebahttp bridge
-     */
-    loadAesl () {
-        log.info('Send Aesl for Thymio.');
+                    node.onEvents = events => {
+                        if (events) {
+                            const {R_state_update: stateUpdate} = events;
+                            if (stateUpdate) {
+                                // FIXME: we insert a 0 at the beginning of our cachedValues
+                                // to maintain consistency with a bug in previous implementation.
+                                // TODO: we should decrement all indices used to access specific values in the cache.
+                                this.cachedValues = [0].concat(stateUpdate);
+                            }
+                            if (typeof this.eventCompleteCallback === 'function') {
+                                this.eventCompleteCallback(Object.keys(events));
+                            }
+                        }
+                    };
 
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = () => {
-            if (xhttp.readyState === 4) {
-                log.info('thymio_motion.aesl sent.');
-                this.connect();
+                    node.setEventsDescriptions(aesl.eventsDefinition)
+                        .then(() => node.sendAsebaProgram(aesl.asebaScript))
+                        .then(() => node.runProgram())
+                        .then(() => {
+                            this.node = node;
+                            this.connected = 2;
+                            log.info(`Node ready!`);
+                        });
+
+                } else if (node.status === thymioApi.NodeStatus.disconnected && node === this.node) {
+                    this.disconnect();
+                }
             }
         };
-
-        xhttp.open('PUT', `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II`, true);
-        xhttp.send(aeslString);
+    }
+    /**
+     * The function closes the connection with the TDM.
+     */
+    disconnect () {
+        if (this.node) {
+            this.node = null;
+        }
+        this.connected = 0;
     }
     sendAction (action, args, callback) {
         log.info(`Send action ${action} with ${args}`);
 
-        const params = args.join('/');
-
-        const xmlhttp = new XMLHttpRequest();
-        xmlhttp.responseType = 'json';
-        const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/${action}/${params}`;
-
-        if (typeof callback === 'function') {
-            xmlhttp.onreadystatechange = () => {
-                if (xmlhttp.readyState !== 4) {
-                    return;
-                }
-                callback(xmlhttp);
-            };
+        if (this.node === null) {
+            log.warn(`Tried to send action ${action} before having a connected node!`);
+            return;
         }
 
-        xmlhttp.open('GET', url, true);
-        xmlhttp.send();
+        // Make sure we are only sending Int16.
+        args = args.map(Math.round);
+
+        this.node.emitEvents(action, args).then(callback);
     }
-    requestSend (args, method, callback) {
-        switch (method) {
-        case 1:
-            method = 'GET';
-            break;
-        case 2:
-            method = 'POST';
-            break;
-        case 3:
-            method = 'PUT';
-            break;
-        default:
-            method = 'GET';
-            break;
-        }
-
-        // First argument is node name
-        const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/${args[0]}`;
-
-        const req = new XMLHttpRequest();
-        if (!req) {
-            return;
-        }
-        req.open(method, url, true);
-        req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        req.onreadystatechange = () => {
-            if (req.readyState !== 4) {
-                return;
-            }
-            callback(req);
+    requestSend (args, _, callback) {
+        // In previous version, the event name was used as an id.
+        // With the new API it expects a Int16 as the id.
+        // We use a static table as actually only a single event is used in this case.
+        const action2Id = {
+            Q_add_motion: 42
         };
-        if (req.readyState === 4) {
-            return;
-        }
-
-        const quid = 3;
-        // let payload = '';
-        // payload += '&body[]=' + quid;
-        // payload += '&body[]=' + args[1];
-        // payload += '&body[]=' + args[2];
-        // payload += '&body[]=' + args[3];
-
-        // Send http request
-        const a = parseInt(args[1], 10);
-        const b = parseInt(args[2], 10);
-        const c = parseInt(args[3], 10);
-
-        req.send(`[${quid},${a},${b},${c}]`);
+        const actionId = action2Id[args[0]];
+        this.sendAction(args[0], [actionId].concat(args.slice(1)), callback);
     }
     /**
      * Run the left/right/all motors.
