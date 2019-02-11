@@ -122,7 +122,8 @@ class Thymio {
 
                     node.onEvents = events => {
                         if (events) {
-                            const {R_state_update: stateUpdate} = events;
+                            const stateUpdate = events.get('R_state_update');
+
                             if (stateUpdate) {
                                 // FIXME: we insert a 0 at the beginning of our cachedValues
                                 // to maintain consistency with a bug in previous implementation.
@@ -130,7 +131,7 @@ class Thymio {
                                 this.cachedValues = [0].concat(stateUpdate);
                             }
                             if (typeof this.eventCompleteCallback === 'function') {
-                                this.eventCompleteCallback(Object.keys(events));
+                                events.forEach(this.eventCompleteCallback);
                             }
                         }
                     };
@@ -246,8 +247,8 @@ class Thymio {
             }
             this.requestSend(args, 2, () => {
                 // Set message to look for in event "message" and execute callback (next block) when received
-                this.eventCompleteCallback = eventData => {
-                    if (eventData[0].match(/^Q_motion_noneleft/)) {
+                this.eventCompleteCallback = (data, event) => {
+                    if (event.match(/^Q_motion_noneleft/)) {
                         callback();
                     }
                 };
@@ -282,8 +283,8 @@ class Thymio {
             // Send request
             this.requestSend(args, 2, () => {
                 // Set message to look for in event "message" and execute callback (next block) when received
-                this.eventCompleteCallback = eventData => {
-                    if (eventData[0].match(/^Q_motion_noneleft/)) {
+                this.eventCompleteCallback = (data, event) => {
+                    if (event.match(/^Q_motion_noneleft/)) {
                         callback();
                     }
                 };
@@ -314,8 +315,8 @@ class Thymio {
         // Send request
         this.requestSend(args, 2, () => {
             // Set message to look for in event "message" and execute callback (next block) when received
-            this.eventCompleteCallback = eventData => {
-                if (eventData[0].match(/^Q_motion_noneleft/)) {
+            this.eventCompleteCallback = (data, event) => {
+                if (event.match(/^Q_motion_noneleft/)) {
                     callback();
                 }
             };
@@ -344,8 +345,8 @@ class Thymio {
         // Send request
         this.requestSend(args, 2, () => {
             // Set message to look for in event "message" and execute callback (next block) when received
-            this.eventCompleteCallback = eventData => {
-                if (eventData[0].match(/^Q_motion_noneleft/)) {
+            this.eventCompleteCallback = (data, event) => {
+                if (event.match(/^Q_motion_noneleft/)) {
                     callback();
                 }
             };
@@ -382,8 +383,8 @@ class Thymio {
 
             this.requestSend(args, 2, () => {
                 // Set message to look for in event "message" and execute callback (next block) when received
-                this.eventCompleteCallback = eventData => {
-                    if (eventData[0].match(/^Q_motion_noneleft/)) {
+                this.eventCompleteCallback = (data, event) => {
+                    if (event.match(/^Q_motion_noneleft/)) {
                         callback();
                     }
                 };
@@ -411,8 +412,8 @@ class Thymio {
 
         this.requestSend(args, 2, () => {
             // Set message to look for in event "message" and execute callback (next block) when received
-            this.eventCompleteCallback = eventData => {
-                if (eventData[0].match(/^Q_motion_noneleft/)) {
+            this.eventCompleteCallback = (data, event) => {
+                if (event.match(/^Q_motion_noneleft/)) {
                     callback();
                 }
             };
@@ -747,8 +748,8 @@ class Thymio {
 
         this.requestSend(args, 2, () => {
             // Set message to look for in event "message" and execute callback (next block) when received
-            this.eventCompleteCallback = eventData => {
-                if (eventData[0].match(/^Q_motion_noneleft/)) {
+            this.eventCompleteCallback = (data, event) => {
+                if (event.match(/^Q_motion_noneleft/)) {
                     callback();
                 }
             };
