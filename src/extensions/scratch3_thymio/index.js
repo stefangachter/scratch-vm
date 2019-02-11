@@ -129,11 +129,7 @@ class Thymio {
                     };
 
                     node.onVariablesChanged = vars => {
-                        Object.entries(vars).forEach(
-                            ([key, val]) => {
-                                this.cachedValues.set(key, val);
-                            }
-                        );
+                        this.cachedValues = new Map([...this.cachedValues, ...vars]);
                     };
 
                     node.setEventsDescriptions(aesl.eventsDefinition)
