@@ -429,7 +429,7 @@ class Thymio {
 
         sensor = parseInt(sensor, 10);
         if (sensor >= 0 && sensor <= 6) {
-            return parseInt(this.cachedValues[17 + sensor], 10);
+            return this.cachedValues.get('prox.horizontal')[sensor];
         }
 
         return 0;
@@ -439,9 +439,8 @@ class Thymio {
      * @returns {number} value returned by a given position sensor.
      */
     ground (sensor) {
-        sensor = parseInt(sensor, 10);
         if (sensor === 0 || sensor === 1) {
-            return parseInt(this.cachedValues[15 + sensor], 10);
+            return this.cachedValues.get('prox.ground.delta')[sensor];
         }
         return 0;
     }
@@ -450,16 +449,13 @@ class Thymio {
      * @returns {number} Distance from an obstacle calculated from the given sensors
      */
     distance (sensor) {
-        const num = parseInt(this.cachedValues[5], 10);
-
         if (sensor === 'front') {
-            const front = num & 0xff;
-            return clamp(front, 0, 190);
+            return this.cachedValues.get('distance.front');
         } else if (sensor === 'back') {
-            const back = ((num >> 8) & 0xff);
-            return clamp(back, 0, 125);
+            return this.cachedValues.get('distance.back');
         }
-        const ground = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
+        const ground = this.cachedValues.get('prox.ground.delta').reduce((a, b) => a + b, 0);
+
         if (ground > 1000) {
             return 0;
         }
@@ -471,63 +467,43 @@ class Thymio {
      * calculated from the horizontal sensors of an obstacle.
      */
     angle (sensor) {
+        return this.cachedValues.get(`angle.${sensor}`);
+    }
+    touchVal (sensor) {
         if (sensor === 'front') {
-            return parseInt(this.cachedValues[4], 10);
-        }
-        const num = parseInt(this.cachedValues[3], 10);
-        const back = (num % 256) - 90;
-        const ground = ((num >> 8) % 256) - 90;
-
-        if (sensor === 'back') {
+            const front = this.cachedValues.get('prox.horizontal')
+                .slice(0, 5)
+                .reduce((a, b) => a + b, 0);
+            return front;
+        } else if (sensor === 'back') {
+            const back = this.cachedValues.get('prox.horizontal')
+                .slice(5, 7)
+                .reduce((a, b) => a + b, 0);
             return back;
         }
+        const ground = this.cachedValues.get('prox.ground.delta')
+            .reduce((a, b) => a + b, 0);
         return ground;
     }
     touching (sensor) {
+        const val = this.touchVal(sensor);
+
         if (sensor === 'front') {
-            let value = 0;
-            for (let i = 0; i < 5; i++) {
-                value = value + parseInt(this.cachedValues[17 + i], 10);
-            }
-            if (value / 1000 > 0) {
-                return true;
-            }
-            return false;
+            return val / 1000 > 0;
         } else if (sensor === 'back') {
-            const value = parseInt(this.cachedValues[22], 10) + parseInt(this.cachedValues[23], 10);
-            if (value / 1000 > 0) {
-                return true;
-            }
-            return false;
+            return val / 1000 > 0;
         }
-        const value = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
-        if (value > 50) {
-            return true;
-        }
-        return false;
+        return val > 50;
     }
     notouching (sensor) {
+        const val = this.touchVal(sensor);
+
         if (sensor === 'front') {
-            let value = 0;
-            for (let i = 0; i < 5; i++) {
-                value = value + parseInt(this.cachedValues[17 + i], 10);
-            }
-            if (value > 0) {
-                return false;
-            }
-            return true;
+            return val <= 0;
         } else if (sensor === 'back') {
-            const value = parseInt(this.cachedValues[22], 10) + parseInt(this.cachedValues[23], 10);
-            if (value > 0) {
-                return false;
-            }
-            return true;
+            return val <= 0;
         }
-        const value = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
-        if (value > 50) {
-            return false;
-        }
-        return true;
+        return val <= 50;
     }
     touchingThreshold (sensor, threshold) {
         let limit = 0;
@@ -536,36 +512,25 @@ class Thymio {
         } else {
             limit = 3000;
         }
+
+        const hori = this.cachedValues.get('prox.horizontal');
+
         if (sensor === 'front') {
-            if (parseInt(this.cachedValues[19], 10) > limit) {
-                return true;
-            }
-            return false;
+            return hori[2] > limit;
         } else if (sensor === 'left') {
-            if (parseInt(this.cachedValues[17], 10) > limit || parseInt(this.cachedValues[18], 10) > limit) {
-                return true;
-            }
-            return false;
+            return hori[0] > limit || hori[1] > limit;
         } else if (sensor === 'right') {
-            if (parseInt(this.cachedValues[20], 10) > limit || parseInt(this.cachedValues[21], 10) > limit) {
-                return true;
-            }
-            return false;
+            return hori[3] > limit || hori[4] > limit;
         } else if (sensor === 'back') {
-            if (parseInt(this.cachedValues[22], 10) > limit || parseInt(this.cachedValues[23], 10) > limit) {
-                return true;
-            }
-            return false;
+            return hori[5] > limit || hori[6] > limit;
         }
         if (threshold === 'far') {
             limit = 50;
         } else {
             limit = 600;
         }
-        if (parseInt(this.cachedValues[15], 10) > limit || parseInt(this.cachedValues[16], 10) > limit) {
-            return true;
-        }
-        return false;
+        const ground = this.cachedValues.get('prox.ground.delta');
+        return ground[0] > limit || ground[1] > limit;
     }
     leds (led, r, g, b) {
         const args = [
@@ -774,48 +739,30 @@ class Thymio {
      * @returns {string} values of the 7 proximity sensors.
      */
     getProximityHorizontal () {
-        let value = this.cachedValues[17];
-
-        for (let i = 1; i < 7; i++) {
-            value = `${value} ${this.cachedValues[(17 + i)]}`;
-        }
-
-        return value;
+        return this.cachedValues.get('prox.horizontal').join(' ');
     }
     micIntensity () {
-        const num = parseInt(this.cachedValues[2], 10);
-        const intensity = parseInt(((num >> 8) % 8), 10);
-        return intensity;
+        return this.cachedValues.get('mic.intensity') / this.cachedValues.get('mic.threshold');
     }
     soundDetected () {
-        const num = parseInt(this.cachedValues[2], 10);
-        const intensity = parseInt(((num >> 8) % 8), 10);
-
-        if (intensity > 2) {
-            return true;
-        }
-        return false;
+        const intensity = this.micIntensity();
+        return intensity > 2;
     }
     bump () {
         const value = 10;
-        const num = this.cachedValues[1];
-        const acc0 = (((num >> 10) % 32) - 16) * 2;
-        const acc1 = (((num >> 5) % 32) - 16) * 2;
-        const acc2 = ((num % 32) - 16) * 2;
-        const ave = (acc0 + acc1 + acc2) / 3;
-        if (parseInt(ave, 10) > value) {
-            return true;
-        }
-        return false;
+        const acc = this.cachedValues.get('acc');
+        const ave = (acc.reduce((a, b) => a + b, 0) / acc.length);
+        return ave > value;
     }
     tilt (menu) {
-        const num = this.cachedValues[1];
+        const acc = this.cachedValues.get('acc');
+
         if (menu === 'left-right') {
-            return (((num >> 10) % 32) - 16) * 2;
+            return acc[0];
         } else if (menu === 'front-back') {
-            return (((num >> 5) % 32) - 16) * 2;
+            return acc[1];
         } else if (menu === 'top-bottom') {
-            return ((num % 32) - 16) * 2;
+            return acc[2];
         }
         return 0;
     }
@@ -824,19 +771,15 @@ class Thymio {
     }
     odometer (odo) {
         if (odo === 'direction') {
-            return parseInt(this.cachedValues[10], 10);
+            return this.cachedValues.get('odo.degree');
         } else if (odo === 'x') {
-            return parseInt(this.cachedValues[11] / 28, 10);
+            return this.cachedValues.get('odo.x') / 28;
         } else if (odo === 'y') {
-            return parseInt(this.cachedValues[12] / 28, 10);
+            return this.cachedValues.get('odo.y') / 28;
         }
     }
     motor (motor) {
-        if (motor === 'left') {
-            return parseInt(this.cachedValues[8], 10);
-        } else if (motor === 'right') {
-            return parseInt(this.cachedValues[9], 10);
-        }
+        return this.cachedValues.get(`motor.${motor}.speed`);
     }
     nextDial (dir) {
         if (this._dial === -1) {
@@ -913,76 +856,22 @@ class Thymio {
         this.sendAction('prox.comm.tx', [value]);
     }
     receive () {
-        return parseInt(this.cachedValues[13], 10);
+        return this.cachedValues.get('prox.comm.rx');
     }
     whenButton (button) {
-        const num = parseInt(this.cachedValues[2], 10);
-
-        if (button === 'center') {
-            const center = parseInt((num >> 3) & 1, 10);
-            if (center === 1) {
-                return true;
-            }
-            return false;
-        } else if (button === 'front') {
-            const forward = parseInt((num >> 2) & 1, 10);
-            if (forward === 1) {
-                return true;
-            }
-            return false;
-        } else if (button === 'back') {
-            const backward = parseInt((num >> 4) & 1, 10);
-            if (backward === 1) {
-                return true;
-            }
-            return false;
-        } else if (button === 'left') {
-            const left = parseInt((num >> 1) & 1, 10);
-            if (left === 1) {
-                return true;
-            }
-            return false;
-        } else if (button === 'right') {
-            const right = parseInt((num) & 1, 10);
-            if (right === 1) {
-                return true;
-            }
-            return false;
-        }
+        return this.valButton(button);
     }
     valButton (button) {
-        const num = parseInt(this.cachedValues[2], 10);
-
         if (button === 'center') {
-            const center = parseInt((num >> 3) & 1, 10);
-            if (center === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.center') > 0;
         } else if (button === 'front') {
-            const forward = parseInt((num >> 2) & 1, 10);
-            if (forward === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.forward') > 0;
         } else if (button === 'back') {
-            const backward = parseInt((num >> 4) & 1, 10);
-            if (backward === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.backward') > 0;
         } else if (button === 'left') {
-            const left = parseInt((num >> 1) & 1, 10);
-            if (left === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.left') > 0;
         } else if (button === 'right') {
-            const right = parseInt((num) & 1, 10);
-            if (right === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.right') > 0;
         }
     }
 }
