@@ -23,7 +23,6 @@ const eventsDefinition = [
     {name: 'A_sound_record', fixed_size: 1},
     {name: 'M_motor_left', fixed_size: 1},
     {name: 'M_motor_right', fixed_size: 1},
-    {name: 'R_state_update', fixed_size: 27},
     {name: 'Q_reset', fixed_size: 0}
 ];
 
@@ -45,8 +44,6 @@ var odo.theta = 0
 var odo.x = 0
 var odo.y = 0
 var odo.degree
-var R_state.do = 1
-var R_state[27]
 
 mic.threshold = 12
 
@@ -65,11 +62,6 @@ onevent Q_reset
   motor.left.target = 0
   motor.right.target = 0
   emit Q_motion_noneleft([Qpc])
-
-onevent prox
-  if R_state.do==1 then
-    emit R_state_update(R_state)
-  end
 
 onevent V_leds_bottom
   if event.args[0]==0 then
@@ -137,31 +129,7 @@ onevent buttons
   call math.dot(angle.front, prox.horizontal,[4,3,0,-3,-4,0,0],9)
   call math.dot(angle.back, prox.horizontal,[0,0,0,0,0,-4,4],9)
   call math.dot(angle.ground, prox.ground.delta,[4,-4],7)
-  R_state = [((((acc[0]/2)+16)%32)<<10) + ((((acc[1]/2)+16)%32)<<5) + (((acc[2]/2)+16)%32),
-        (((mic.intensity/mic.threshold)%8)<<8) +
-          (0<<5) +
-          (button.backward<<4) +
-          (button.center<<3) +
-          (button.forward<<2) +
-          (button.left<<1) +
-          button.right,
-        ((angle.ground+90) << 8) + (angle.back+90),
-        angle.front,
-        (distance.back<<8) + distance.front,
-        motor.left.target,
-        motor.right.target,
-        motor.left.speed,
-        motor.right.speed,
-        odo.degree,
-        odo.x,
-        odo.y,
-        prox.comm.rx,
-        prox.comm.tx,
-        prox.ground.delta[0:1],
-        prox.horizontal[0:6],
-        Qid[0:3]
-        ]
-
+  
 onevent Q_add_motion
   tmp[0:3] = event.args[0:3]
   callsub motion_add

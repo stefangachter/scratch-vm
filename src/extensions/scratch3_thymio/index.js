@@ -91,7 +91,7 @@ class Thymio {
         this.node = null;
         this.connected = 0;
         this.eventCompleteCallback = false;
-        this.cachedValues = Array();
+        this.cachedValues = new Map();
         this._leds = [0, 0, 0];
         this._dial = -1;
 
@@ -122,17 +122,18 @@ class Thymio {
 
                     node.onEvents = events => {
                         if (events) {
-                            const {R_state_update: stateUpdate} = events;
-                            if (stateUpdate) {
-                                // FIXME: we insert a 0 at the beginning of our cachedValues
-                                // to maintain consistency with a bug in previous implementation.
-                                // TODO: we should decrement all indices used to access specific values in the cache.
-                                this.cachedValues = [0].concat(stateUpdate);
-                            }
                             if (typeof this.eventCompleteCallback === 'function') {
                                 this.eventCompleteCallback(Object.keys(events));
                             }
                         }
+                    };
+
+                    node.onVariablesChanged = vars => {
+                        Object.entries(vars).forEach(
+                            ([key, val]) => {
+                                this.cachedValues.set(key, val);
+                            }
+                        );
                     };
 
                     node.setEventsDescriptions(aesl.eventsDefinition)
