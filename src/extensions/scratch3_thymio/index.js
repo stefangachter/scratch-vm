@@ -168,6 +168,7 @@ class Thymio {
         args = args.map(Math.round);
 
         this.node.emitEvents(action, args).then(callback);
+        this.runtime.requestRedraw();
     }
     requestSend (args, _, callback) {
         // In previous version, the event name was used as an id.
@@ -892,6 +893,7 @@ class Scratch3ThymioBlocks {
         this.runtime = runtime;
 
         this.thymio = new Thymio();
+        this.thymio.runtime = this.runtime;
     }
     /**
       * @returns {object} messages - extension messages for locale
