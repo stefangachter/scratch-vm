@@ -145,6 +145,10 @@ class VirtualMachine extends EventEmitter {
 
         this.extensionManager = new ExtensionManager(this.runtime);
 
+        this.runtime.on(Runtime.RUNTIME_STARTED, () => {
+            this.extensionManager.loadExtensionURL("thymio");
+        });
+
         this.blockListener = this.blockListener.bind(this);
         this.flyoutBlockListener = this.flyoutBlockListener.bind(this);
         this.monitorBlockListener = this.monitorBlockListener.bind(this);
