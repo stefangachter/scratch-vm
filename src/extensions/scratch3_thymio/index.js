@@ -137,6 +137,7 @@ class Thymio {
                         .then(() => node.runProgram())
                         .then(() => {
                             this.node = node;
+                            this.runtime.on('PROJECT_STOP_ALL', this.stopMotors.bind(this));
                             this.connected = 2;
                             this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
                             log.info(`Node ready!`);
