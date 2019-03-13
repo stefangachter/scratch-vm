@@ -138,6 +138,7 @@ class Thymio {
                         .then(() => {
                             this.node = node;
                             this.connected = 2;
+                            this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
                             log.info(`Node ready!`);
                         });
 
@@ -155,6 +156,10 @@ class Thymio {
             this.node = null;
         }
         this.connected = 0;
+        this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECTED);
+    }
+    isConnected () {
+        return this.connected === 2;
     }
     sendAction (action, args, callback) {
         log.info(`Send action ${action} with ${args}`);
@@ -881,6 +886,10 @@ class Scratch3ThymioBlocks {
         return 'en';
     }
 
+    static get EXTENSION_ID () {
+        return 'thymio';
+    }
+
     /**
      * Construct a set of Thymio blocks.
      * @param {Runtime} runtime - the Scratch 3.0 runtime.
@@ -891,9 +900,13 @@ class Scratch3ThymioBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
+        this.runtime.registerPeripheralExtension(Scratch3ThymioBlocks.EXTENSION_ID, this);
 
         this.thymio = new Thymio();
         this.thymio.runtime = this.runtime;
+    }
+    isConnected () {
+        return this.thymio.isConnected();
     }
     /**
       * @returns {object} messages - extension messages for locale
@@ -920,9 +933,10 @@ class Scratch3ThymioBlocks {
         const messages = this.getMessagesForLocale();
 
         return {
-            id: 'thymio',
+            id: Scratch3ThymioBlocks.EXTENSION_ID,
             name: 'Thymio',
             blockIconURI: blockIconURI,
+            showStatusButton: true,
             blocks: [
                 {
                     opcode: 'setMotor',
