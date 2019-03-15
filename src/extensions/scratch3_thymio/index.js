@@ -141,6 +141,8 @@ class Thymio {
                             this.connected = 2;
                             this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
                             log.info(`Node ready!`);
+
+                            window.document.title = `Thymio ${node.name}`;
                         });
 
                 } else if (node.status === thymioApi.NodeStatus.disconnected && node === this.node) {
