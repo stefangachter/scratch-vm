@@ -27,6 +27,7 @@ const blockIconURI = require('./icon');
 
 const aesl = require('./aesl');
 const thymioApi = require('@mobsya/thymio-api');
+const bytesToUuid = require('uuid/lib/bytesToUuid');
 
 
 const clamp = function (val, min, max) {
@@ -106,17 +107,28 @@ class Thymio {
             this.disconnect();
         }
 
-        log.info('Tries to connect with TDM.');
-        const client = thymioApi.createClient(Thymio.TDM_URL);
+        const location = window.location.href;
+
+        const url = new URL(location);
+        const device = url.searchParams.get('device');
+        const ws = url.searchParams.get('ws') || Thymio.TDM_DEFAULT_URL;
+
+        log.info(`Tries to connect with TDM on ${ws}.`);
+        const client = thymioApi.createClient(ws);
 
         client.onNodesChanged = nodes => {
             for (const node of nodes) {
+                const rawUuid = bytesToUuid(node.id.data, 0);
+                const uuid = `{${rawUuid}}`;
+
                 if (this.node === null && node.status === thymioApi.NodeStatus.available) {
-                    // We found an available node to connect to.
-                    // We try to lock it.
-                    node.lock().then(() => {
-                        log.info(`Node ${node.id} locked.`);
-                    });
+                    if ((device === null) || (uuid === device)) {
+                        // We found an available node to connect to.
+                        // We try to lock it.
+                        node.lock().then(() => {
+                            log.info(`Node ${node.id} locked.`);
+                        });
+                    }
                 } else if (node.status === thymioApi.NodeStatus.ready) {
                     log.info(`Node ${node.id} ready.`);
 
