@@ -1,6 +1,6 @@
 /**
 * Thymio exension for Scratch 3.0
-* v 1.0 for internal use
+* v 2.0 for internal use
 * Created by Pollen Robotics on May 7, 2018
 *
 * This program is free software: you can redistribute it and/or modify
@@ -21,9 +21,13 @@ const BlockType = require('../../extension-support/block-type');
 const Timer = require('../../util/timer');
 const Cast = require('../../util/cast');
 const log = require('../../util/log');
+const formatMessage = require('format-message');
 
-const aeslString = require('./aesl');
 const blockIconURI = require('./icon');
+
+const aesl = require('./aesl');
+const thymioApi = require('@mobsya/thymio-api');
+const bytesToUuid = require('uuid/lib/bytesToUuid');
 
 
 const clamp = function (val, min, max) {
@@ -69,8 +73,8 @@ const makeLedsRGBVector = function (color) {
 };
 
 class Thymio {
-    static get ASEBA_HTTP_URL () {
-        return 'http://127.0.0.1:3000';
+    static get TDM_URL () {
+        return 'ws://127.0.0.1:8597';
     }
     static get VMIN () {
         return -500;
@@ -85,148 +89,116 @@ class Thymio {
         return 32;
     }
     constructor () {
-        this.source = null;
+        this.node = null;
         this.connected = 0;
         this.eventCompleteCallback = false;
-        this.cachedValues = Array();
+        this.cachedValues = new Map();
         this._leds = [0, 0, 0];
         this._dial = -1;
 
-        this.loadAesl();
         this.connect();
     }
     /**
-     * The function subscribes to the Thymio’s SSE stream, sets an Event Listener on messages received
-     * and stores R_state variable in cachedValues
+     * The function subscribes to the TDM notification and tries to lock a Thymio Node.
+     * When locked, the aseba script is sent and the various events watched.
      */
     connect () {
-        if (this.source) {
+        if (this.node) {
             this.disconnect();
         }
 
-        const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/events`;
-        this.source = new EventSource(url);
+        const location = window.location.href;
 
-        this.source.addEventListener('open', () => {
-            log.info('Connection opened with Thymio web bridge.');
-        });
-        this.source.addEventListener('message', e => {
-            const eventData = e.data.split(' ');
-            this.connected = 2;
+        const url = new URL(location);
+        const device = url.searchParams.get('device');
+        const ws = url.searchParams.get('ws') || Thymio.TDM_DEFAULT_URL;
 
-            if (eventData[0] === 'R_state_update') {
-                this.cachedValues = eventData;
-            } else {
-                log.info(`Thymio emitted: ${eventData}`);
-            }
-            // If block requires to check event message for completion, it will set eventCompleteCallback
-            if (typeof this.eventCompleteCallback === 'function') {
-                // We pass eventData to be able to read event message
-                this.eventCompleteCallback(eventData);
-            }
-        });
-        this.source.addEventListener('error', () => {
-            this.disconnect('Event stream closed');
-            this.connected = 0;
-            this.connect();
-        });
-    }
-    /**
-     * The function closes the Event Source.
-     */
-    disconnect () {
-        if (this.source) {
-            this.source.close();
-            this.source = null;
-        }
-        this.connected = 0;
-    }
-    /**
-     * The function sends code of thymio_motion.aesl to asebahttp bridge
-     */
-    loadAesl () {
-        log.info('Send Aesl for Thymio.');
+        log.info(`Tries to connect with TDM on ${ws}.`);
+        const client = thymioApi.createClient(ws);
 
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = () => {
-            if (xhttp.readyState === 4) {
-                log.info('thymio_motion.aesl sent.');
-                this.connect();
+        client.onNodesChanged = nodes => {
+            for (const node of nodes) {
+                const rawUuid = bytesToUuid(node.id.data, 0);
+                const uuid = `{${rawUuid}}`;
+
+                if (this.node === null && node.status === thymioApi.NodeStatus.available) {
+                    if ((device === null) || (uuid === device)) {
+                        // We found an available node to connect to.
+                        // We try to lock it.
+                        node.lock().then(() => {
+                            log.info(`Node ${node.id} locked.`);
+                        });
+                    }
+                } else if (node.status === thymioApi.NodeStatus.ready) {
+                    log.info(`Node ${node.id} ready.`);
+
+                    node.onEvents = events => {
+                        if (events) {
+                            if (typeof this.eventCompleteCallback === 'function') {
+                                events.forEach(this.eventCompleteCallback);
+                            }
+                        }
+                    };
+
+                    node.onVariablesChanged = vars => {
+                        this.cachedValues = new Map([...this.cachedValues, ...vars]);
+                    };
+
+                    node.setEventsDescriptions(aesl.eventsDefinition)
+                        .then(() => node.sendAsebaProgram(aesl.asebaScript))
+                        .then(() => node.runProgram())
+                        .then(() => {
+                            this.node = node;
+                            this.runtime.on('PROJECT_STOP_ALL', this.stopMotors.bind(this));
+                            this.connected = 2;
+                            this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
+                            log.info(`Node ready!`);
+
+                            window.document.title = `Thymio ${node.name}`;
+                        });
+
+                } else if (node.status === thymioApi.NodeStatus.disconnected && node === this.node) {
+                    this.disconnect();
+                }
             }
         };
-
-        xhttp.open('PUT', `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II`, true);
-        xhttp.send(aeslString);
+    }
+    /**
+     * The function closes the connection with the TDM.
+     */
+    disconnect () {
+        if (this.node) {
+            this.node = null;
+        }
+        this.connected = 0;
+        this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECTED);
+    }
+    isConnected () {
+        return this.connected === 2;
     }
     sendAction (action, args, callback) {
         log.info(`Send action ${action} with ${args}`);
 
-        const params = args.join('/');
-
-        const xmlhttp = new XMLHttpRequest();
-        xmlhttp.responseType = 'json';
-        const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/${action}/${params}`;
-
-        if (typeof callback === 'function') {
-            xmlhttp.onreadystatechange  = () => {
-				if (xmlhttp.readyState !== 4) {
-					return;
-				}
-			callback(xmlhttp);
-			};
+        if (this.node === null) {
+            log.warn(`Tried to send action ${action} before having a connected node!`);
+            return;
         }
 
-        xmlhttp.open('GET', url, true);
-        xmlhttp.send();
+        // Make sure we are only sending Int16.
+        args = args.map(Math.round);
+
+        this.node.emitEvents(action, args).then(callback);
+        this.runtime.requestRedraw();
     }
-    requestSend (args, method, callback) {
-        switch (method) {
-        case 1:
-            method = 'GET';
-            break;
-        case 2:
-            method = 'POST';
-            break;
-        case 3:
-            method = 'PUT';
-            break;
-        default:
-            method = 'GET';
-            break;
-        }
-
-        // First argument is node name
-        const url = `${Thymio.ASEBA_HTTP_URL}/nodes/thymio-II/${args[0]}`;
-
-        const req = new XMLHttpRequest();
-        if (!req) {
-            return;
-        }
-        req.open(method, url, true);
-        req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        req.onreadystatechange = () => {
-            if (req.readyState !== 4) {
-                return;
-            }
-            callback(req);
+    requestSend (args, _, callback) {
+        // In previous version, the event name was used as an id.
+        // With the new API it expects a Int16 as the id.
+        // We use a static table as actually only a single event is used in this case.
+        const action2Id = {
+            Q_add_motion: 42
         };
-        if (req.readyState === 4) {
-            return;
-        }
-
-        const quid = 3;
-        // let payload = '';
-        // payload += '&body[]=' + quid;
-        // payload += '&body[]=' + args[1];
-        // payload += '&body[]=' + args[2];
-        // payload += '&body[]=' + args[3];
-
-        // Send http request
-        const a = parseInt(args[1], 10);
-        const b = parseInt(args[2], 10);
-        const c = parseInt(args[3], 10);
-
-        req.send(`[${quid},${a},${b},${c}]`);
+        const actionId = action2Id[args[0]];
+        this.sendAction(args[0], [actionId].concat(args.slice(1)), callback);
     }
     /**
      * Run the left/right/all motors.
@@ -292,8 +264,8 @@ class Thymio {
             }
             this.requestSend(args, 2, () => {
                 // Set message to look for in event "message" and execute callback (next block) when received
-                this.eventCompleteCallback = eventData => {
-                    if (eventData[0].match(/^Q_motion_noneleft/)) {
+                this.eventCompleteCallback = (data, event) => {
+                    if (event.match(/^Q_motion_noneleft/)) {
                         callback();
                     }
                 };
@@ -328,8 +300,8 @@ class Thymio {
             // Send request
             this.requestSend(args, 2, () => {
                 // Set message to look for in event "message" and execute callback (next block) when received
-                this.eventCompleteCallback = eventData => {
-                    if (eventData[0].match(/^Q_motion_noneleft/)) {
+                this.eventCompleteCallback = (data, event) => {
+                    if (event.match(/^Q_motion_noneleft/)) {
                         callback();
                     }
                 };
@@ -360,8 +332,8 @@ class Thymio {
         // Send request
         this.requestSend(args, 2, () => {
             // Set message to look for in event "message" and execute callback (next block) when received
-            this.eventCompleteCallback = eventData => {
-                if (eventData[0].match(/^Q_motion_noneleft/)) {
+            this.eventCompleteCallback = (data, event) => {
+                if (event.match(/^Q_motion_noneleft/)) {
                     callback();
                 }
             };
@@ -390,8 +362,8 @@ class Thymio {
         // Send request
         this.requestSend(args, 2, () => {
             // Set message to look for in event "message" and execute callback (next block) when received
-            this.eventCompleteCallback = eventData => {
-                if (eventData[0].match(/^Q_motion_noneleft/)) {
+            this.eventCompleteCallback = (data, event) => {
+                if (event.match(/^Q_motion_noneleft/)) {
                     callback();
                 }
             };
@@ -428,8 +400,8 @@ class Thymio {
 
             this.requestSend(args, 2, () => {
                 // Set message to look for in event "message" and execute callback (next block) when received
-                this.eventCompleteCallback = eventData => {
-                    if (eventData[0].match(/^Q_motion_noneleft/)) {
+                this.eventCompleteCallback = (data, event) => {
+                    if (event.match(/^Q_motion_noneleft/)) {
                         callback();
                     }
                 };
@@ -457,8 +429,8 @@ class Thymio {
 
         this.requestSend(args, 2, () => {
             // Set message to look for in event "message" and execute callback (next block) when received
-            this.eventCompleteCallback = eventData => {
-                if (eventData[0].match(/^Q_motion_noneleft/)) {
+            this.eventCompleteCallback = (data, event) => {
+                if (event.match(/^Q_motion_noneleft/)) {
                     callback();
                 }
             };
@@ -474,7 +446,7 @@ class Thymio {
 
         sensor = parseInt(sensor, 10);
         if (sensor >= 0 && sensor <= 6) {
-            return parseInt(this.cachedValues[17 + sensor], 10);
+            return this.cachedValues.get('prox.horizontal')[sensor];
         }
 
         return 0;
@@ -484,9 +456,8 @@ class Thymio {
      * @returns {number} value returned by a given position sensor.
      */
     ground (sensor) {
-        sensor = parseInt(sensor, 10);
         if (sensor === 0 || sensor === 1) {
-            return parseInt(this.cachedValues[15 + sensor], 10);
+            return this.cachedValues.get('prox.ground.delta')[sensor];
         }
         return 0;
     }
@@ -495,16 +466,13 @@ class Thymio {
      * @returns {number} Distance from an obstacle calculated from the given sensors
      */
     distance (sensor) {
-        const num = parseInt(this.cachedValues[5], 10);
-
         if (sensor === 'front') {
-            const front = num & 0xff;
-            return clamp(front, 0, 190);
+            return this.cachedValues.get('distance.front');
         } else if (sensor === 'back') {
-            const back = ((num >> 8) & 0xff);
-            return clamp(back, 0, 125);
+            return this.cachedValues.get('distance.back');
         }
-        const ground = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
+        const ground = this.cachedValues.get('prox.ground.delta').reduce((a, b) => a + b, 0);
+
         if (ground > 1000) {
             return 0;
         }
@@ -516,102 +484,70 @@ class Thymio {
      * calculated from the horizontal sensors of an obstacle.
      */
     angle (sensor) {
+        return this.cachedValues.get(`angle.${sensor}`);
+    }
+    touchVal (sensor) {
         if (sensor === 'front') {
-            return parseInt(this.cachedValues[4], 10);
-        }
-        const num = parseInt(this.cachedValues[3], 10);
-        const back = (num % 256) - 90;
-        const ground = ((num >> 8) % 256) - 90;
-
-        if (sensor === 'back') {
+            const front = this.cachedValues.get('prox.horizontal')
+                .slice(0, 5)
+                .reduce((a, b) => a + b, 0);
+            return front;
+        } else if (sensor === 'back') {
+            const back = this.cachedValues.get('prox.horizontal')
+                .slice(5, 7)
+                .reduce((a, b) => a + b, 0);
             return back;
         }
+        const ground = this.cachedValues.get('prox.ground.delta')
+            .reduce((a, b) => a + b, 0);
         return ground;
     }
     touching (sensor) {
+        const val = this.touchVal(sensor);
+
         if (sensor === 'front') {
-            let value = 0;
-            for (let i = 0; i < 5; i++) {
-                value = value + parseInt(this.cachedValues[17 + i], 10);
-            }
-            if (value / 1000 > 0) {
-                return true;
-            }
-            return false;
+            return val / 1000 > 0;
         } else if (sensor === 'back') {
-            const value = parseInt(this.cachedValues[22], 10) + parseInt(this.cachedValues[23], 10);
-            if (value / 1000 > 0) {
-                return true;
-            }
-            return false;
+            return val / 1000 > 0;
         }
-        const value = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
-        if (value > 50) {
-            return true;
-        }
-        return false;
+        return val > 50;
     }
-	notouching (sensor) {
+    notouching (sensor) {
+        const val = this.touchVal(sensor);
+
         if (sensor === 'front') {
-            let value = 0;
-            for (let i = 0; i < 5; i++) {
-                value = value + parseInt(this.cachedValues[17 + i], 10);
-            }
-            if (value > 0) {
-                return false;
-            }
-            return true;
+            return val <= 0;
         } else if (sensor === 'back') {
-            const value = parseInt(this.cachedValues[22], 10) + parseInt(this.cachedValues[23], 10);
-            if (value > 0) {
-                return false;
-            }
-            return true;
+            return val <= 0;
         }
-        const value = parseInt(this.cachedValues[15], 10) + parseInt(this.cachedValues[16], 10);
-        if (value > 50) {
-            return false;
-        }
-        return true;
+        return val <= 50;
     }
     touchingThreshold (sensor, threshold) {
         let limit = 0;
-		if (threshold === 'far')
-			limit=1000;
-		else
-			limit=3000;
-		if (sensor === 'front') {
-                if (parseInt(this.cachedValues[19], 10) > limit) {
-                    return true;
-                }
-			return false;	
-            }
-		else if (sensor === 'left') {
-			if (parseInt(this.cachedValues[17], 10) > limit || parseInt(this.cachedValues[18], 10) > limit) {
-                    return true;
-				}
-				return false;			
-		}
-		else if (sensor === 'right') {
-            if (parseInt(this.cachedValues[20], 10) > limit || parseInt(this.cachedValues[21], 10) > limit) {
-                return true;
-			}
-			return false;			
-		}
-		else if (sensor === 'back') {
-            if (parseInt(this.cachedValues[22], 10) > limit || parseInt(this.cachedValues[23], 10) > limit) {
-                return true;
-            }
-            return false;
+        if (threshold === 'far') {
+            limit = 1000;
+        } else {
+            limit = 3000;
         }
-		if (threshold === 'far')
-			limit=50;
-		else
-			limit=600;
-        if (parseInt(this.cachedValues[15], 10) > limit || parseInt(this.cachedValues[16], 10) > limit) {
-            return true;
+
+        const hori = this.cachedValues.get('prox.horizontal');
+
+        if (sensor === 'front') {
+            return hori[2] > limit;
+        } else if (sensor === 'left') {
+            return hori[0] > limit || hori[1] > limit;
+        } else if (sensor === 'right') {
+            return hori[3] > limit || hori[4] > limit;
+        } else if (sensor === 'back') {
+            return hori[5] > limit || hori[6] > limit;
         }
-        return false;
+        if (threshold === 'far') {
+            limit = 50;
+        } else {
+            limit = 600;
+        }
+        const ground = this.cachedValues.get('prox.ground.delta');
+        return ground[0] > limit || ground[1] > limit;
     }
     leds (led, r, g, b) {
         const args = [
@@ -794,8 +730,8 @@ class Thymio {
 
         this.requestSend(args, 2, () => {
             // Set message to look for in event "message" and execute callback (next block) when received
-            this.eventCompleteCallback = eventData => {
-                if (eventData[0].match(/^Q_motion_noneleft/)) {
+            this.eventCompleteCallback = (data, event) => {
+                if (event.match(/^Q_motion_noneleft/)) {
                     callback();
                 }
             };
@@ -820,48 +756,30 @@ class Thymio {
      * @returns {string} values of the 7 proximity sensors.
      */
     getProximityHorizontal () {
-        let value = this.cachedValues[17];
-
-        for (let i = 1; i < 7; i++) {
-            value = `${value} ${this.cachedValues[(17 + i)]}`;
-        }
-
-        return value;
+        return this.cachedValues.get('prox.horizontal').join(' ');
     }
     micIntensity () {
-        const num = parseInt(this.cachedValues[2], 10);
-        const intensity = parseInt(((num >> 8) % 8), 10);
-        return intensity;
+        return this.cachedValues.get('mic.intensity') / this.cachedValues.get('mic.threshold');
     }
     soundDetected () {
-        const num = parseInt(this.cachedValues[2], 10);
-        const intensity = parseInt(((num >> 8) % 8), 10);
-
-        if (intensity > 2) {
-            return true;
-        }
-        return false;
+        const intensity = this.micIntensity();
+        return intensity > 2;
     }
     bump () {
         const value = 10;
-        const num = this.cachedValues[1];
-        const acc0 = (((num >> 10) % 32) - 16) * 2;
-        const acc1 = (((num >> 5) % 32) - 16) * 2;
-        const acc2 = ((num % 32) - 16) * 2;
-        const ave = (acc0 + acc1 + acc2) / 3;
-        if (parseInt(ave, 10) > value) {
-            return true;
-        }
-        return false;
+        const acc = this.cachedValues.get('acc');
+        const ave = (acc.reduce((a, b) => a + b, 0) / acc.length);
+        return ave > value;
     }
     tilt (menu) {
-        const num = this.cachedValues[1];
+        const acc = this.cachedValues.get('acc');
+
         if (menu === 'left-right') {
-            return (((num >> 10) % 32) - 16) * 2;
+            return acc[0];
         } else if (menu === 'front-back') {
-            return (((num >> 5) % 32) - 16) * 2;
+            return acc[1];
         } else if (menu === 'top-bottom') {
-            return ((num % 32) - 16) * 2;
+            return acc[2];
         }
         return 0;
     }
@@ -870,19 +788,15 @@ class Thymio {
     }
     odometer (odo) {
         if (odo === 'direction') {
-            return parseInt(this.cachedValues[10], 10);
+            return this.cachedValues.get('odo.degree');
         } else if (odo === 'x') {
-            return parseInt(this.cachedValues[11] / 28, 10);
+            return this.cachedValues.get('odo.x') / 28;
         } else if (odo === 'y') {
-            return parseInt(this.cachedValues[12] / 28, 10);
+            return this.cachedValues.get('odo.y') / 28;
         }
     }
     motor (motor) {
-        if (motor === 'left') {
-            return parseInt(this.cachedValues[8], 10);
-        } else if (motor === 'right') {
-            return parseInt(this.cachedValues[9], 10);
-        }
+        return this.cachedValues.get(`motor.${motor}.speed`);
     }
     nextDial (dir) {
         if (this._dial === -1) {
@@ -959,76 +873,22 @@ class Thymio {
         this.sendAction('prox.comm.tx', [value]);
     }
     receive () {
-        return parseInt(this.cachedValues[13], 10);
+        return this.cachedValues.get('prox.comm.rx');
     }
     whenButton (button) {
-        const num = parseInt(this.cachedValues[2], 10);
-
-        if (button === 'center') {
-            const center = parseInt((num >> 3) & 1, 10);
-            if (center === 1) {
-                return true;
-            }
-            return false;
-        } else if (button === 'front') {
-            const forward = parseInt((num >> 2) & 1, 10);
-            if (forward === 1) {
-                return true;
-            }
-            return false;
-        } else if (button === 'back') {
-            const backward = parseInt((num >> 4) & 1, 10);
-            if (backward === 1) {
-                return true;
-            }
-            return false;
-        } else if (button === 'left') {
-            const left = parseInt((num >> 1) & 1, 10);
-            if (left === 1) {
-                return true;
-            }
-            return false;
-        } else if (button === 'right') {
-            const right = parseInt((num) & 1, 10);
-            if (right === 1) {
-                return true;
-            }
-            return false;
-        }
+        return this.valButton(button);
     }
-	valButton (button) {
-        const num = parseInt(this.cachedValues[2], 10);
-
+    valButton (button) {
         if (button === 'center') {
-            const center = parseInt((num >> 3) & 1, 10);
-            if (center === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.center') > 0;
         } else if (button === 'front') {
-            const forward = parseInt((num >> 2) & 1, 10);
-            if (forward === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.forward') > 0;
         } else if (button === 'back') {
-            const backward = parseInt((num >> 4) & 1, 10);
-            if (backward === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.backward') > 0;
         } else if (button === 'left') {
-            const left = parseInt((num >> 1) & 1, 10);
-            if (left === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.left') > 0;
         } else if (button === 'right') {
-            const right = parseInt((num) & 1, 10);
-            if (right === 1) {
-                return true;
-            }
-            return false;
+            return this.cachedValues.get('button.right') > 0;
         }
     }
 }
@@ -1037,6 +897,14 @@ class Thymio {
  * Scratch 3.0 blocks to interact with a Thymio-II robot.
  */
 class Scratch3ThymioBlocks {
+    static get DEFAULT_LANG () {
+        return 'en';
+    }
+
+    static get EXTENSION_ID () {
+        return 'thymio';
+    }
+
     /**
      * Construct a set of Thymio blocks.
      * @param {Runtime} runtime - the Scratch 3.0 runtime.
@@ -1047,21 +915,47 @@ class Scratch3ThymioBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
+        this.runtime.registerPeripheralExtension(Scratch3ThymioBlocks.EXTENSION_ID, this);
 
         this.thymio = new Thymio();
+        this.thymio.runtime = this.runtime;
+    }
+    isConnected () {
+        return this.thymio.isConnected();
+    }
+    /**
+      * @returns {object} messages - extension messages for locale
+        It is defined by using the current browser locale or the default (en) if the language is not (yet) supported.
+    */
+    getMessagesForLocale () {
+        const locale = formatMessage.setup().locale;
+
+        let messages;
+        try {
+            messages = require(`./lang/${locale}`);
+        } catch (ex) {
+            log.warn(`Locale "${locale}" is not (yet) supported for this extension.`);
+            log.warn(`Falling back to ${Scratch3ThymioBlocks.DEFAULT_LANG}`);
+
+            messages = require(`./lang/${Scratch3ThymioBlocks.DEFAULT_LANG}`);
+        }
+        return messages;
     }
     /**
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo () {
+        const messages = this.getMessagesForLocale();
+
         return {
-            id: 'thymio',
+            id: Scratch3ThymioBlocks.EXTENSION_ID,
             name: 'Thymio',
             blockIconURI: blockIconURI,
+            showStatusButton: true,
             blocks: [
                 {
                     opcode: 'setMotor',
-                    text: 'motor speed [M] [N]',
+                    text: messages.blocks.setMotor,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         M: {
@@ -1077,12 +971,12 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'stopMotors',
-                    text: 'stop motors',
+                    text: messages.blocks.stopMotors,
                     blockType: BlockType.COMMAND
                 },
                 {
                     opcode: 'move',
-                    text: 'move [N]',
+                    text: messages.blocks.move,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1093,7 +987,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'moveWithSpeed',
-                    text: 'move [N] with speed [S]',
+                    text: messages.blocks.moveWithSpeed,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1108,7 +1002,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'moveWithTime',
-                    text: 'move [N] in [S]s',
+                    text: messages.blocks.moveWithTime,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1123,7 +1017,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turn',
-                    text: 'turn [N]',
+                    text: messages.blocks.turn,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1134,7 +1028,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turnWithSpeed',
-                    text: 'turn [N] with speed [S]',
+                    text: messages.blocks.turnWithSpeed,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1149,7 +1043,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'turnWithTime',
-                    text: 'turn [N] in [S]s',
+                    text: messages.blocks.turnWithTime,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1162,9 +1056,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'arc',
-                    text: 'circle radius [R] angle [A]',
+                    text: messages.blocks.arc,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         R: {
@@ -1177,9 +1071,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'setOdomoter',
-                    text: 'set odometer [N] [O] [P]',
+                    text: messages.blocks.setOdomoter,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1196,9 +1090,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'leds',
-                    text: 'leds RGB [L] [R] [G] [B]',
+                    text: messages.blocks.leds,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1222,7 +1116,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'setLeds',
-                    text: 'leds set color [C] on [L]',
+                    text: messages.blocks.setLeds,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1238,7 +1132,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'changeLeds',
-                    text: 'leds change color [C] on [L]',
+                    text: messages.blocks.changeLeds,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1254,12 +1148,12 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'clearLeds',
-                    text: 'leds clear',
+                    text: messages.blocks.clearLeds,
                     blockType: BlockType.COMMAND
-                },               
-				{
+                },
+                {
                     opcode: 'nextDial',
-                    text: 'leds next dial [L]',
+                    text: messages.blocks.nextDial,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         L: {
@@ -1271,7 +1165,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsCircle',
-                    text: 'leds dial all [A] [B] [C] [D] [E] [F] [G] [H]',
+                    text: messages.blocks.ledsCircle,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1310,7 +1204,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsProxH',
-                    text: 'leds sensors h [A] [B] [C] [D] [E] [F] [G] [H]',
+                    text: messages.blocks.ledsProxH,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1349,7 +1243,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsProxV',
-                    text: 'leds sensors v [A] [B]',
+                    text: messages.blocks.ledsProxV,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1364,7 +1258,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsButtons',
-                    text: 'leds buttons [A] [B] [C] [D]',
+                    text: messages.blocks.ledsButtons,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1387,7 +1281,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsTemperature',
-                    text: 'leds temperature [A] [B]',
+                    text: messages.blocks.ledsTemperature,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1402,7 +1296,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsRc',
-                    text: 'leds rc [A]',
+                    text: messages.blocks.ledsRc,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1413,7 +1307,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'ledsSound',
-                    text: 'leds sound [A]',
+                    text: messages.blocks.ledsSound,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         A: {
@@ -1422,9 +1316,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'soundSystem',
-                    text: 'play system sound [S]',
+                    text: messages.blocks.soundSystem,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         S: {
@@ -1436,7 +1330,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundFreq',
-                    text: 'play note [N] during [S]s',
+                    text: messages.blocks.soundFreq,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1451,7 +1345,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundPlaySd',
-                    text: 'play sound SD [N]',
+                    text: messages.blocks.soundPlaySd,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1462,7 +1356,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundRecord',
-                    text: 'record sound [N]',
+                    text: messages.blocks.soundRecord,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1473,7 +1367,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'soundReplay',
-                    text: 'replay sound [N]',
+                    text: messages.blocks.soundReplay,
                     blockType: BlockType.COMMAND,
                     arguments: {
                         N: {
@@ -1482,9 +1376,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'whenButton',
-                    text: 'when button [B]',
+                    text: messages.blocks.whenButton,
                     blockType: BlockType.HAT,
                     arguments: {
                         B: {
@@ -1494,9 +1388,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'touching',
-                    text: 'object detected [S]',
+                    text: messages.blocks.touching,
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1506,9 +1400,9 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'notouching',
-                    text: 'no object[S]',
+                    text: messages.blocks.notouching,
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1520,7 +1414,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'touchingThreshold',
-                    text: 'object detected [S] [N]',
+                    text: messages.blocks.touchingThreshold,
                     blockType: BlockType.HAT,
                     arguments: {
                         S: {
@@ -1530,24 +1424,24 @@ class Scratch3ThymioBlocks {
                         },
                         N: {
                             type: ArgumentType.STRING,
-							menu: 'nearfar',
-							defaultValue: 'near'
+                            menu: 'nearfar',
+                            defaultValue: 'near'
                         }
                     }
                 },
-				{
+                {
                     opcode: 'bump',
-                    text: 'tap',
+                    text: messages.blocks.bump,
                     blockType: BlockType.HAT
                 },
-				{
+                {
                     opcode: 'soundDetected',
-                    text: 'sound detected',
+                    text: messages.blocks.soundDetected,
                     blockType: BlockType.HAT
                 },
-				{
+                {
                     opcode: 'valButton',
-                    text: 'button [B]',
+                    text: messages.blocks.valButton,
                     blockType: BlockType.BOOLEAN,
                     arguments: {
                         B: {
@@ -1556,10 +1450,10 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'center'
                         }
                     }
-                },				
-				{
+                },
+                {
                     opcode: 'proximity',
-                    text: 'proximity sensor [N]',
+                    text: messages.blocks.proximity,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         N: {
@@ -1568,14 +1462,14 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'proxHorizontal',
-                    text: 'proximity sensors',
+                    text: messages.blocks.proxHorizontal,
                     blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'ground',
-                    text: 'ground sensor [N]',
+                    text: messages.blocks.ground,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         N: {
@@ -1584,14 +1478,14 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-				{
+                {
                     opcode: 'proxGroundDelta',
-                    text: 'ground sensors',
-                    blockType: BlockType.REPORTER 
+                    text: messages.blocks.proxGroundDelta,
+                    blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'distance',
-                    text: 'distance [S]',
+                    text: messages.blocks.distance,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         S: {
@@ -1603,7 +1497,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'angle',
-                    text: 'angle [S]',
+                    text: messages.blocks.angle,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         S: {
@@ -1613,10 +1507,10 @@ class Scratch3ThymioBlocks {
                         }
                     }
                 },
-                
+
                 {
                     opcode: 'tilt',
-                    text: 'tilt on [T]',
+                    text: messages.blocks.tilt,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         T: {
@@ -1625,15 +1519,15 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'front-back'
                         }
                     }
-                },  
+                },
                 {
                     opcode: 'micIntensity',
-                    text: 'sound level',
+                    text: messages.blocks.micIntensity,
                     blockType: BlockType.REPORTER
-                },              
+                },
                 {
                     opcode: 'odometer',
-                    text: 'odometer [O]',
+                    text: messages.blocks.odometer,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         O: {
@@ -1645,7 +1539,7 @@ class Scratch3ThymioBlocks {
                 },
                 {
                     opcode: 'motor',
-                    text: 'measure motor [M]',
+                    text: messages.blocks.motor,
                     blockType: BlockType.REPORTER,
                     arguments: {
                         M: {
@@ -1654,8 +1548,8 @@ class Scratch3ThymioBlocks {
                             defaultValue: 'left'
                         }
                     }
-                }                
-                /*{
+                }
+                /* {
                     opcode: 'emit',
                     text: 'emit [N]',
                     blockType: BlockType.COMMAND,
@@ -1670,73 +1564,73 @@ class Scratch3ThymioBlocks {
                     opcode: 'receive',
                     text: 'receive',
                     blockType: BlockType.REPORTER
-                },*/				
+                },*/
             ],
             menus: {
                 leftrightall: [
-					{text:'left', value: 'left'},
-					{text:'right', value: 'right'},
-					{text:'all', value: 'all'}
-				],
+                    {text: messages.menus.leftrightall.left, value: 'left'},
+                    {text: messages.menus.leftrightall.right, value: 'right'},
+                    {text: messages.menus.leftrightall.all, value: 'all'}
+                ],
                 leftright: [
-					{text:'left', value: 'left'},
-					{text:'right', value: 'right'}
-				],
+                    {text: messages.menus.leftright.left, value: 'left'},
+                    {text: messages.menus.leftright.right, value: 'right'}
+                ],
                 sensors: [
-					{text:'front', value: 'front'},
-					{text:'back', value: 'back'},
-					{text:'ground', value: 'ground'}
-				],
-				sensors2: [
-					{text:'left', value: 'left'},
-					{text:'front', value: 'front'},
-					{text:'right', value: 'right'},
-					{text:'back', value: 'back'},
-					{text:'ground', value: 'ground'}
-				],
+                    {text: messages.menus.sensors.front, value: 'front'},
+                    {text: messages.menus.sensors.back, value: 'back'},
+                    {text: messages.menus.sensors.ground, value: 'ground'}
+                ],
+                sensors2: [
+                    {text: messages.menus.sensors2.left, value: 'left'},
+                    {text: messages.menus.sensors2.front, value: 'front'},
+                    {text: messages.menus.sensors2.right, value: 'right'},
+                    {text: messages.menus.sensors2.back, value: 'back'},
+                    {text: messages.menus.sensors2.ground, value: 'ground'}
+                ],
                 proxsensors: [
-                    {text: 'front far left', value: 0},
-                    {text: 'front left', value: 1},
-                    {text: 'front center', value: 2},
-                    {text: 'front right', value: 3},
-                    {text: 'front far right', value: 4},
-                    {text: 'back left', value: 5},
-                    {text: 'back right', value: 6}
+                    {text: messages.menus.proxsensors.front_far_left, value: 0},
+                    {text: messages.menus.proxsensors.front_left, value: 1},
+                    {text: messages.menus.proxsensors.front_center, value: 2},
+                    {text: messages.menus.proxsensors.front_right, value: 3},
+                    {text: messages.menus.proxsensors.front_far_right, value: 4},
+                    {text: messages.menus.proxsensors.back_left, value: 5},
+                    {text: messages.menus.proxsensors.back_right, value: 6}
                 ],
                 light: [
-					{text:'all', value: 'all'},
-					{text:'top', value: 'top'},
-					{text:'bottom', value: 'bottom'},
-					{text:'bottom-left', value: 'bottom-left'},
-					{text:'bottom-right', value: 'bottom-right'}
-				],
+                    {text: messages.menus.light.all, value: 'all'},
+                    {text: messages.menus.light.top, value: 'top'},
+                    {text: messages.menus.light.bottom, value: 'bottom'},
+                    {text: messages.menus.light.bottom_left, value: 'bottom-left'},
+                    {text: messages.menus.light.bottom_right, value: 'bottom-right'}
+                ],
                 angles: [
-					{text:'front', value: 'front'},
-					{text:'back', value: 'back'},
-					{text:'ground', value: 'ground'}
-				],
+                    {text: messages.menus.angles.front, value: 'front'},
+                    {text: messages.menus.angles.back, value: 'back'},
+                    {text: messages.menus.angles.ground, value: 'ground'}
+                ],
                 sounds: ['0', '1', '2', '3', '4', '5', '6', '7'],
                 odo: [
-					{text:'direction', value: 'direction'},
-					{text:'x', value: 'x'},
-					{text:'y', value: 'y'}
-				],
+                    {text: messages.menus.odo.direction, value: 'direction'},
+                    {text: messages.menus.odo.x, value: 'x'},
+                    {text: messages.menus.odo.y, value: 'y'}
+                ],
                 tilts: [
-					{text:'front-back', value: 'front-back'},
-					{text:'top-bottom', value: 'top-bottom'},
-					{text:'left-right', value: 'left-right'}
-				],
+                    {text: messages.menus.tilts.front_back, value: 'front-back'},
+                    {text: messages.menus.tilts.top_bottom, value: 'top-bottom'},
+                    {text: messages.menus.tilts.left_right, value: 'left-right'}
+                ],
                 buttons: [
-					{text:'center', value: 'center'},
-					{text:'front', value: 'front'},
-					{text:'back', value: 'back'},
-					{text:'left', value: 'left'},
-					{text:'right', value: 'right'}
-				],
-				nearfar: [
-					{text:'near', value: 'near'},
-					{text:'far', value: 'far'}
-				]
+                    {text: messages.menus.buttons.center, value: 'center'},
+                    {text: messages.menus.buttons.front, value: 'front'},
+                    {text: messages.menus.buttons.back, value: 'back'},
+                    {text: messages.menus.buttons.left, value: 'left'},
+                    {text: messages.menus.buttons.right, value: 'right'}
+                ],
+                nearfar: [
+                    {text: messages.menus.nearfar.near, value: 'near'},
+                    {text: messages.menus.nearfar.far, value: 'far'}
+                ]
             }
         };
     }
@@ -1898,7 +1792,7 @@ class Scratch3ThymioBlocks {
     touching (args) {
         return this.thymio.touching(args.S);
     }
-	notouching (args) {
+    notouching (args) {
         return this.thymio.notouching(args.S);
     }
     touchingThreshold (args) {
@@ -2040,7 +1934,7 @@ class Scratch3ThymioBlocks {
     whenButton (args) {
         return this.thymio.whenButton(args.B);
     }
-	valButton (args) {
+    valButton (args) {
         return this.thymio.valButton(args.B);
     }
 }

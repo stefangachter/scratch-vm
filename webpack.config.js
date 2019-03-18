@@ -10,6 +10,9 @@ const base = {
         host: '0.0.0.0',
         port: process.env.PORT || 8073
     },
+    node: {
+        fs: 'empty'
+    },
     devtool: 'cheap-module-source-map',
     output: {
         library: 'VirtualMachine',
@@ -21,7 +24,7 @@ const base = {
             loader: 'babel-loader',
             include: path.resolve(__dirname, 'src'),
             query: {
-                presets: [['env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
+                presets: [['@babel/preset-env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
             }
         },
         {
