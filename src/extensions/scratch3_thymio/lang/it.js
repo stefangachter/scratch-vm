@@ -1,49 +1,49 @@
 module.exports = {
     blocks: {
-        setMotor: 'motori [M] [N]',
+        setMotor: 'motori [M] con velocità [N]',
         stopMotors: 'ferma motori',
         move: 'avanza di [N]',
         moveWithSpeed: 'avanza di [N] con velocità [S]',
         moveWithTime: 'avanza di [N] in [S]s',
-        turn: 'rutoa di [N] gradi',
-        turnWithSpeed: 'ruota di [N] grandi con velocità [S]',
+        turn: 'ruota di [N]',
+        turnWithSpeed: 'ruota di [N] con velocità [S]',
         turnWithTime: 'ruota di [N] in [S]s',
-        arc: 'fai un cerchio di raggio [R] per [A] gradi',
-        setOdomoter: 'inizializza isometria [N] [O] [P]',
-        leds: 'tutti i LED RVB [L] [R] [G] [B]',
-        setLeds: 'colora LED [C] [L]',
-        changeLeds: 'cambia colore LED [C] [L]',
+        arc: 'fai un cerchio di raggio [R] per [A]',
+        setOdomoter: 'inizializza odometria direzione [N] x: [O] y: [P]',
+        leds: 'LED [L] R: [R] V: [G] B: [B]',
+        setLeds: 'porta LED [L] effetto colore a [C] ',
+        changeLeds: 'cambia LED [L] l\'effetto colore di [C]',
         clearLeds: 'spegni LED',
-        nextDial: 'on LED quadrante [L]',
-        ledsCircle: 'on LED quadrante [A] [B] [C] [D] [E] [F] [G] [H]',
-        ledsProxH: 'LED sensori prox. [A] [B] [C] [D] [E] [F] [G] [H]',
+        nextDial: 'accendi il LED cel cerchio successivo a [L]',
+        ledsCircle: 'LED cerchio [A] [B] [C] [D] [E] [F] [G] [H]',
+        ledsProxH: 'LED sensori pross. oriz. [A] [B] [C] [D] [E] [F] [G] [H]',
         ledsProxV: 'LED sensori terreno [A] [B]',
-        ledsButtons: 'LED bottoni [A] [B] [C] [D]',
-        ledsTemperature: 'LED bottoni [A] [B]',
-        ledsRc: 'LED RC [A]',
+        ledsButtons: 'LED pulsanti [A] [B] [C] [D]',
+        ledsTemperature: 'LED temperatura [A] [B]',
+        ledsRc: 'LED telecomando [A]',
         ledsSound: 'LED microfono [A]',
-        soundSystem: 'suona suono Thymio [S]',
-        soundFreq: 'suona nota [N] per [S]s',
-        soundPlaySd: 'suono suono su scheda SD [N]',
+        soundSystem: 'accendere suono sistema [S]',
+        soundFreq: 'suona nota a [N]Hz per [S]s', 
+        soundPlaySd: 'accendere suono su scheda SD [N]',
         soundRecord: 'registra suono [N]',
         soundReplay: 'riproduci suono [N]',
-        whenButton: 'bottone [B]',
-        touching: 'oggetto rilevato [S]',
-        notouching: 'nessun oggetto rilevato [S]', // TODO: correct?
-        touchingThreshold: 'oggetto rilevato [S] [N]',
-        bump: 'urto',
-        soundDetected: 'rumore captato',
-        valButton: 'bottone [B]',
-        proximity: 'sensore prox. [N]',
-        proxHorizontal: 'sensori di prox.',
+        whenButton: 'quando si preme il pulsante [B]',
+        touching: 'quando oggetto è rilevato [S]',
+        notouching: 'quando nessun oggetto è rilevato [S]', 
+        touchingThreshold: 'quando oggetto è rilevato [S] [N]',
+        bump: 'quando un urto è rilevato',
+        soundDetected: 'quando un rumore è rilevato',
+        valButton: 'pulsante [B]',
+        proximity: 'sensore pross. oriz. [N]',
+        proxHorizontal: 'mostra tutti i sensori di pross. oriz.',
         ground: 'sensore terreno [N]',
-        proxGroundDelta: 'sensori di prox.',
+        proxGroundDelta: 'mostra tutti i sensori terreno',
         distance: 'distanza [S]',
         angle: 'angolo [S]',
         tilt: 'inclinazione [T]',
         micIntensity: 'livello sonoro',
-        odometer: 'isometria [O]',
-        motor: 'misura motori [M]'
+        odometer: 'odometria [O]',
+        motor: 'velocità motori [M]'
     },
     menus: {
         leftrightall: {
@@ -62,17 +62,17 @@ module.exports = {
         },
         sensors2: {
             left: 'sinistro',
-            front: 'devanti',
+            front: 'davanti',
             right: 'destro',
             back: 'dietro',
             ground: 'terreno'
         },
         proxsensors: {
-            front_far_left: 'tutto a sinistra',
-            front_left: 'a sinistra',
+            front_far_left: 'sinistra',
+            front_left: 'centro sinistra',
             front_center: 'centrale',
-            front_right: 'a destra',
-            front_far_right: 'tutto a destra',
+            front_right: 'centro destra',
+            front_far_right: 'destra',
             back_left: 'posteriore sinistro',
             back_right: 'posteriore destro'
         },
@@ -84,7 +84,7 @@ module.exports = {
             bottom_right: 'inferiori a destra'
         },
         angles: {
-            front: 'devanti',
+            front: 'davanti',
             back: 'dietro',
             ground: 'terreno'
         },
@@ -94,20 +94,20 @@ module.exports = {
             y: 'y'
         },
         tilts: {
-            front_back: 'devanti-dietro',
+            front_back: 'davanti-dietro',
             top_bottom: 'sopra-sotto',
             left_right: 'sinistro-destro'
         },
         buttons: {
             center: 'centrale',
-            front: 'devanti',
+            front: 'davanti',
             back: 'dietro',
             left: 'sinistro',
-            right: 'destra'
+            right: 'destro'
         },
         nearfar: {
-            near: 'vicina', // TODO: correct?
-            far: 'lontana' // TODO: correct?
+            near: 'vicino', 
+            far: 'lontano' 
         }
     }
 };
