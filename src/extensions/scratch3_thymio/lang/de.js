@@ -76,6 +76,17 @@ module.exports = {
             back_left: 'rückwärtig links',
             back_right: 'rückwärtig rechts'
         },
+        horizontalSensors: {
+            front_far_left: 'links',
+            front_left: 'zentral links',
+            front_center: 'zentral',
+            front_right: 'zentral rechts',
+            front_far_right: 'rechts'
+        },
+        groundSensors: {
+            left: 'links',
+            right: 'rechts'
+        },
         light: {
             all: 'alle',
             top: 'oben',

@@ -1458,6 +1458,7 @@ class Scratch3ThymioBlocks {
                     arguments: {
                         N: {
                             type: ArgumentType.NUMBER,
+                            menu: 'horizontalSensors',
                             defaultValue: 2
                         }
                     }
@@ -1474,6 +1475,7 @@ class Scratch3ThymioBlocks {
                     arguments: {
                         N: {
                             type: ArgumentType.NUMBER,
+                            menu: 'groundSensors',
                             defaultValue: 0
                         }
                     }
@@ -1596,6 +1598,17 @@ class Scratch3ThymioBlocks {
                     {text: messages.menus.proxsensors.front_far_right, value: 4},
                     {text: messages.menus.proxsensors.back_left, value: 5},
                     {text: messages.menus.proxsensors.back_right, value: 6}
+                ],
+                horizontalSensors: [
+                    {text: messages.menus.horizontalSensors.front_far_left, value: 0},
+                    {text: messages.menus.horizontalSensors.front_left, value: 1},
+                    {text: messages.menus.horizontalSensors.front_center, value: 2},
+                    {text: messages.menus.horizontalSensors.front_right, value: 3},
+                    {text: messages.menus.horizontalSensors.front_far_right, value: 4}
+                ],
+                groundSensors: [
+                    {text: messages.menus.groundSensors.left, value: 0},
+                    {text: messages.menus.groundSensors.right, value: 1}
                 ],
                 light: [
                     {text: messages.menus.light.all, value: 'all'},
