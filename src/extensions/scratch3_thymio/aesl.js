@@ -195,7 +195,6 @@ onevent motor
   call math.fill(tmp,0)
   tmp[Qnx]=1
   tmp[Qpc]=4
-  call leds.buttons(tmp[0],tmp[1],tmp[2],tmp[3])
 `;
 
 module.exports = {eventsDefinition, asebaScript};
