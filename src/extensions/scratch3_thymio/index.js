@@ -116,6 +116,8 @@ class Thymio {
         log.info(`Tries to connect with TDM on ${ws}.`);
         const client = thymioApi.createClient(ws);
 
+        this.tap = false;
+
         client.onNodesChanged = nodes => {
             for (const node of nodes) {
                 const rawUuid = bytesToUuid(node.id.data, 0);
@@ -134,6 +136,11 @@ class Thymio {
 
                     node.onEvents = events => {
                         if (events) {
+                            events.forEach((_, evt) => {
+                                if (evt === 'tap') {
+                                    this.tap = true;
+                                }
+                            });
                             if (typeof this.eventCompleteCallback === 'function') {
                                 events.forEach(this.eventCompleteCallback);
                             }
@@ -764,10 +771,9 @@ class Thymio {
         return intensity > 2;
     }
     bump () {
-        const value = 10;
-        const acc = this.cachedValues.get('acc');
-        const ave = (acc.reduce((a, b) => a + b, 0) / acc.length);
-        return ave > value;
+        const tap = this.tap;
+        this.tap = false;
+        return tap;
     }
     tilt (menu) {
         const acc = this.cachedValues.get('acc');
