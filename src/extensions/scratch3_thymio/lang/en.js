@@ -19,7 +19,7 @@ module.exports = {
         ledsProxH: 'horiz. prox. sensors LEDs [A] [B] [C] [D] [E] [F] [G] [H]',
         ledsProxV: 'ground sensors LEDs [A] [B]',
         ledsButtons: 'buttons LEDs [A] [B] [C] [D]',
-        ledsTemperature: 'temperature LEDs [A] [B]',
+        ledsTemperature: 'temperature LEDs R: [A] B: [B]',
         ledsRc: 'remote control LED [A]',
         ledsSound: 'microphone LED [A]',
         soundSystem: 'play system sound [S]',
@@ -100,8 +100,8 @@ module.exports = {
         },
         buttons: {
             center: 'center',
-            front: 'front',
-            back: 'back',
+            front: 'forward',
+            back: 'backward',
             left: 'left',
             right: 'right'
         },

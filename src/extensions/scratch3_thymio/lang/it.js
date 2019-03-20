@@ -19,7 +19,7 @@ module.exports = {
         ledsProxH: 'LED sensori pross. oriz. [A] [B] [C] [D] [E] [F] [G] [H]',
         ledsProxV: 'LED sensori terreno [A] [B]',
         ledsButtons: 'LED pulsanti [A] [B] [C] [D]',
-        ledsTemperature: 'LED temperatura [A] [B]',
+        ledsTemperature: 'LED temperatura R: [A] B: [B]',
         ledsRc: 'LED telecomando [A]',
         ledsSound: 'LED microfono [A]',
         soundSystem: 'accendere suono sistema [S]',
@@ -100,7 +100,7 @@ module.exports = {
         },
         buttons: {
             center: 'centrale',
-            front: 'davanti',
+            front: 'avanti',
             back: 'dietro',
             left: 'sinistro',
             right: 'destro'

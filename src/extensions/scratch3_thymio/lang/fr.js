@@ -19,9 +19,9 @@ module.exports = {
         ledsProxH: 'LED capteurs prox. horiz. [A] [B] [C] [D] [E] [F] [G] [H]',
         ledsProxV: 'LED capteurs de sol [A] [B]',
         ledsButtons: 'LED boutons [A] [B] [C] [D]',
-        ledsTemperature: 'LED température [A] [B]',
+        ledsTemperature: 'LED température R: [A] B: [B]',
         ledsRc: 'LED télécommande [A]',
-        ledsSound: 'LED mico [A]',
+        ledsSound: 'LED micro [A]',
         soundSystem: 'jouer son système [S]',
         soundFreq: 'jouer note à [N]Hz pendant [S]s',
         soundPlaySd: 'jouer son carte SD [N]',
@@ -100,8 +100,8 @@ module.exports = {
         },
         buttons: {
             center: 'central',
-            front: 'devant',
-            back: 'derrière',
+            front: 'avant',
+            back: 'arrière',
             left: 'gauche',
             right: 'droite'
         },

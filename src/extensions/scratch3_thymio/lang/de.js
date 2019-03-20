@@ -19,7 +19,7 @@ module.exports = {
         ledsProxH: 'horiz. Näherungsschalter LEDs [A] [B] [C] [D] [E] [F] [G] [H]',
         ledsProxV: 'Bodensensoren LEDs [A] [B]',
         ledsButtons: 'Tasten LEDs [A] [B] [C] [D]',
-        ledsTemperature: 'TemperaturLEDs [A] [B]',
+        ledsTemperature: 'TemperaturLEDs R: [A] B: [B]',
         ledsRc: 'Fernbedienung LED [A]',
         ledsSound: 'MikrofonLED [A]',
         soundSystem: 'System Sound abspielen [S]',
