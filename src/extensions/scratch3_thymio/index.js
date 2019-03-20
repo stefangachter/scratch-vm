@@ -471,12 +471,10 @@ class Thymio {
         } else if (sensor === 'back') {
             return this.cachedValues.get('distance.back');
         }
-        const ground = this.cachedValues.get('prox.ground.delta').reduce((a, b) => a + b, 0);
+        let ground = this.cachedValues.get('prox.ground.delta').reduce((a, b) => a + b, 0);
 
-        if (ground > 1000) {
-            return 0;
-        }
-        return 500;
+        ground = parseInt(0.5 * clamp(ground, 0, 1000), 10);
+        return 500 - ground;
     }
     /**
      * @param {string} sensor - (front, back, ground)
