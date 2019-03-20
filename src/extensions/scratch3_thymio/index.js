@@ -73,7 +73,7 @@ const makeLedsRGBVector = function (color) {
 };
 
 class Thymio {
-    static get TDM_URL () {
+    static get TDM_DEFAULT_URL () {
         return 'ws://127.0.0.1:8597';
     }
     static get VMIN () {
