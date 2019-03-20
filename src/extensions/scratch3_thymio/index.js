@@ -117,6 +117,7 @@ class Thymio {
         const client = thymioApi.createClient(ws);
 
         this.tap = false;
+        this.useHorizontalLeds = false;
 
         client.onNodesChanged = nodes => {
             for (const node of nodes) {
@@ -703,7 +704,11 @@ class Thymio {
         this.sendAction('V_leds_circle', [0, 0, 0, 0, 0, 0, 0, 0], () => {
             this.sendAction('V_leds_top', [0, 0, 0], () => {
                 this.sendAction('V_leds_bottom', [0, 0, 0, 0], () => {
-                    this.sendAction('V_leds_bottom', [1, 0, 0, 0], () => {});
+                    this.sendAction('V_leds_bottom', [1, 0, 0, 0], () => {
+                        if (this.useHorizontalLeds) {
+                            this.sendAction('V_leds_prox_h', [0, 0, 0, 0, 0, 0, 0, 0]);
+                        }
+                    });
                 });
             });
         });
@@ -829,6 +834,8 @@ class Thymio {
         this.sendAction('V_leds_circle', args);
     }
     ledsProxH (fl, flm, flc, frc, frm, fr, br, bl) {
+        this.useHorizontalLeds = true;
+
         const args = [
             parseInt(clamp(fl, Thymio.LMIN, Thymio.LMAX), 10),
             parseInt(clamp(flm, Thymio.LMIN, Thymio.LMAX), 10),
