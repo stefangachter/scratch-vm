@@ -214,7 +214,8 @@ class Thymio {
      * @param {value} value - Speed in Aseba unities.
      */
     setMotor (motor, value) {
-        value = parseInt(clamp(value, Thymio.VMIN, Thymio.VMAX), 10);
+        value = parseInt(value, 10) * 32 / 10; // from mm.s to Thymio's unit
+        value = clamp(value, Thymio.VMIN, Thymio.VMAX);
         const args = [value];
 
         log.info(`Set motor ${motor} to ${value}`);
