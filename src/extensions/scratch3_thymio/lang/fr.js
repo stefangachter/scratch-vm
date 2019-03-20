@@ -26,6 +26,7 @@ module.exports = {
         soundFreq: 'jouer note à [N]Hz pendant [S]s',
         soundPlaySd: 'jouer son carte SD [N]',
         soundRecord: 'enregistrer son [N]',
+        stopSoundRecord: 'arrêter l\'enregistrement du son',
         soundReplay: 'rejouer son [N]',
         whenButton: 'quand le bouton [B] est pressé',
         touching: 'quand un objet est détecté [S]',

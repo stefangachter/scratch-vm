@@ -1366,6 +1366,11 @@ class Scratch3ThymioBlocks {
                     }
                 },
                 {
+                    opcode: 'stopSoundRecord',
+                    text: messages.blocks.stopSoundRecord,
+                    blockType: BlockType.COMMAND
+                },
+                {
                     opcode: 'soundReplay',
                     text: messages.blocks.soundReplay,
                     blockType: BlockType.COMMAND,
@@ -1846,6 +1851,9 @@ class Scratch3ThymioBlocks {
     }
     soundRecord (args) {
         this.thymio.soundRecord(args.N);
+    }
+    stopSoundRecord () {
+        this.thymio.soundRecord(-1);
     }
     soundReplay (args) {
         this.thymio.soundReplay(args.N);
