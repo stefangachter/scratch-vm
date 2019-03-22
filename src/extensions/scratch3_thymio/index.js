@@ -770,7 +770,7 @@ class Thymio {
         return this.cachedValues.get('prox.horizontal').join(' ');
     }
     micIntensity () {
-        return this.cachedValues.get('mic.intensity') / this.cachedValues.get('mic.threshold');
+        return this.cachedValues.get('mic.intensity');
     }
     soundDetected () {
         const intensity = this.micIntensity();
