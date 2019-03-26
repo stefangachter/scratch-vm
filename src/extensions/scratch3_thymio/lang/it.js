@@ -82,7 +82,9 @@ module.exports = {
             front_left: 'centro sinistra',
             front_center: 'centrale',
             front_right: 'centro destra',
-            front_far_right: 'destra'
+            front_far_right: 'destra',
+            back_left: 'posteriore sinistro',
+            back_right: 'posteriore destro'
         },
         groundSensors: {
             left: 'sinistra',

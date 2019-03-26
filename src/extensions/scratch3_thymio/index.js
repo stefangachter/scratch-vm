@@ -1622,7 +1622,9 @@ class Scratch3ThymioBlocks {
                     {text: messages.menus.horizontalSensors.front_left, value: 1},
                     {text: messages.menus.horizontalSensors.front_center, value: 2},
                     {text: messages.menus.horizontalSensors.front_right, value: 3},
-                    {text: messages.menus.horizontalSensors.front_far_right, value: 4}
+                    {text: messages.menus.horizontalSensors.front_far_right, value: 4},
+                    {text: messages.menus.horizontalSensors.back_left, value: 5},
+                    {text: messages.menus.horizontalSensors.back_right, value: 6}
                 ],
                 groundSensors: [
                     {text: messages.menus.groundSensors.left, value: 0},

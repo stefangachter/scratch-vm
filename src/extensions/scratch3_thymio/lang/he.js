@@ -83,6 +83,8 @@ module.exports = {
             front_center: 'קדימה-מרכז',
             front_right: 'קדימה-ימין',
             front_far_right: 'קדימה-ימין-קיצוני',
+            back_left: 'אחורה-שמאל',
+            back_right: 'אחורה-ימין'
         },
 		groundSensors: {
             left: 'left',//TODO
