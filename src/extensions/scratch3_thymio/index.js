@@ -806,7 +806,8 @@ class Thymio {
         }
     }
     motor (motor) {
-        return this.cachedValues.get(`motor.${motor}.speed`);
+        const s = this.cachedValues.get(`motor.${motor}.speed`);
+        return s * 10 / 32;
     }
     nextDial (dir) {
         if (this._dial === -1) {
