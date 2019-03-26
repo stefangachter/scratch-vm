@@ -26,6 +26,7 @@ module.exports = {
         soundFreq: 'נגן תו בתדר [N]הרץ במשך [S] שניות',
         soundPlaySd: 'נגן צליל מכרטיס הזיכרון [N]',
         soundRecord: 'הקלט צליל [N]',
+		stopSoundRecord: 'stop sound recording',//TODO
         soundReplay: 'השמע צליל מוקלט [N]',
         whenButton: 'בלחיצת כפתור [B]',
         touching: 'כאשר זוהה מכשול [S]',
@@ -75,6 +76,17 @@ module.exports = {
             front_far_right: 'קדימה-ימין-קיצוני',
             back_left: 'אחורה-שמאל',
             back_right: 'אחורה-ימין'
+        },
+		horizontalSensors: {
+            front_far_left: 'קדימה-שמאל-קיצוני',//TODO control
+            front_left: 'קדימה-שמאל',
+            front_center: 'קדימה-מרכז',
+            front_right: 'קדימה-ימין',
+            front_far_right: 'קדימה-ימין-קיצוני',
+        },
+		groundSensors: {
+            left: 'left',//TODO
+            right: 'right'
         },
         light: {
             all: 'הכל',
