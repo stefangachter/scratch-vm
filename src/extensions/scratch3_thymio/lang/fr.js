@@ -26,6 +26,7 @@ module.exports = {
         soundFreq: 'jouer note à [N]Hz pendant [S]s',
         soundPlaySd: 'jouer son carte SD [N]',
         soundRecord: 'enregistrer son [N]',
+        stopSoundRecord: 'arrêter l\'enregistrement du son',
         soundReplay: 'rejouer son [N]',
         whenButton: 'quand le bouton [B] est pressé',
         touching: 'quand un objet est détecté [S]',
@@ -75,6 +76,19 @@ module.exports = {
             front_far_right: 'droite',
             back_left: 'arrière gauche',
             back_right: 'arrière droite'
+        },
+        horizontalSensors: {
+            front_far_left: 'gauche',
+            front_left: 'centre gauche',
+            front_center: 'centre',
+            front_right: 'centre droite',
+            front_far_right: 'droite',
+            back_left: 'arrière gauche',
+            back_right: 'arrière droite'
+        },
+        groundSensors: {
+            left: 'gauche',
+            right: 'droite'
         },
         light: {
             all: 'tout',

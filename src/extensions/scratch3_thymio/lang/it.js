@@ -23,13 +23,14 @@ module.exports = {
         ledsRc: 'LED telecomando [A]',
         ledsSound: 'LED microfono [A]',
         soundSystem: 'accendere suono sistema [S]',
-        soundFreq: 'suona nota a [N]Hz per [S]s', 
+        soundFreq: 'suona nota a [N]Hz per [S]s',
         soundPlaySd: 'accendere suono su scheda SD [N]',
         soundRecord: 'registra suono [N]',
+        stopSoundRecord: 'interrompere la registrazione del suono',
         soundReplay: 'riproduci suono [N]',
         whenButton: 'quando si preme il pulsante [B]',
         touching: 'quando oggetto è rilevato [S]',
-        notouching: 'quando nessun oggetto è rilevato [S]', 
+        notouching: 'quando nessun oggetto è rilevato [S]',
         touchingThreshold: 'quando oggetto è rilevato [S] [N]',
         bump: 'quando un urto è rilevato',
         soundDetected: 'quando un rumore è rilevato',
@@ -76,6 +77,19 @@ module.exports = {
             back_left: 'posteriore sinistro',
             back_right: 'posteriore destro'
         },
+        horizontalSensors: {
+            front_far_left: 'sinistra',
+            front_left: 'centro sinistra',
+            front_center: 'centrale',
+            front_right: 'centro destra',
+            front_far_right: 'destra',
+            back_left: 'posteriore sinistro',
+            back_right: 'posteriore destro'
+        },
+        groundSensors: {
+            left: 'sinistra',
+            right: 'destra'
+        },
         light: {
             all: 'tutti',
             top: 'superiori',
@@ -106,8 +120,8 @@ module.exports = {
             right: 'destro'
         },
         nearfar: {
-            near: 'vicino', 
-            far: 'lontano' 
+            near: 'vicino',
+            far: 'lontano'
         }
     }
 };

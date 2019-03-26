@@ -73,7 +73,7 @@ const makeLedsRGBVector = function (color) {
 };
 
 class Thymio {
-    static get TDM_URL () {
+    static get TDM_DEFAULT_URL () {
         return 'ws://127.0.0.1:8597';
     }
     static get VMIN () {
@@ -116,6 +116,9 @@ class Thymio {
         log.info(`Tries to connect with TDM on ${ws}.`);
         const client = thymioApi.createClient(ws);
 
+        this.tap = false;
+        this.useHorizontalLeds = false;
+
         client.onNodesChanged = nodes => {
             for (const node of nodes) {
                 const rawUuid = bytesToUuid(node.id.data, 0);
@@ -134,6 +137,11 @@ class Thymio {
 
                     node.onEvents = events => {
                         if (events) {
+                            events.forEach((_, evt) => {
+                                if (evt === 'tap') {
+                                    this.tap = true;
+                                }
+                            });
                             if (typeof this.eventCompleteCallback === 'function') {
                                 events.forEach(this.eventCompleteCallback);
                             }
@@ -206,7 +214,8 @@ class Thymio {
      * @param {value} value - Speed in Aseba unities.
      */
     setMotor (motor, value) {
-        value = parseInt(clamp(value, Thymio.VMIN, Thymio.VMAX), 10);
+        value = parseInt(value, 10) * 32 / 10; // from mm.s to Thymio's unit
+        value = clamp(value, Thymio.VMIN, Thymio.VMAX);
         const args = [value];
 
         log.info(`Set motor ${motor} to ${value}`);
@@ -471,12 +480,10 @@ class Thymio {
         } else if (sensor === 'back') {
             return this.cachedValues.get('distance.back');
         }
-        const ground = this.cachedValues.get('prox.ground.delta').reduce((a, b) => a + b, 0);
+        let ground = this.cachedValues.get('prox.ground.delta').reduce((a, b) => a + b, 0);
 
-        if (ground > 1000) {
-            return 0;
-        }
-        return 500;
+        ground = parseInt(0.5 * clamp(ground, 0, 1000), 10);
+        return 500 - ground;
     }
     /**
      * @param {string} sensor - (front, back, ground)
@@ -698,7 +705,11 @@ class Thymio {
         this.sendAction('V_leds_circle', [0, 0, 0, 0, 0, 0, 0, 0], () => {
             this.sendAction('V_leds_top', [0, 0, 0], () => {
                 this.sendAction('V_leds_bottom', [0, 0, 0, 0], () => {
-                    this.sendAction('V_leds_bottom', [1, 0, 0, 0], () => {});
+                    this.sendAction('V_leds_bottom', [1, 0, 0, 0], () => {
+                        if (this.useHorizontalLeds) {
+                            this.sendAction('V_leds_prox_h', [0, 0, 0, 0, 0, 0, 0, 0]);
+                        }
+                    });
                 });
             });
         });
@@ -759,17 +770,16 @@ class Thymio {
         return this.cachedValues.get('prox.horizontal').join(' ');
     }
     micIntensity () {
-        return this.cachedValues.get('mic.intensity') / this.cachedValues.get('mic.threshold');
+        return this.cachedValues.get('mic.intensity');
     }
     soundDetected () {
         const intensity = this.micIntensity();
         return intensity > 2;
     }
     bump () {
-        const value = 10;
-        const acc = this.cachedValues.get('acc');
-        const ave = (acc.reduce((a, b) => a + b, 0) / acc.length);
-        return ave > value;
+        const tap = this.tap;
+        this.tap = false;
+        return tap;
     }
     tilt (menu) {
         const acc = this.cachedValues.get('acc');
@@ -796,7 +806,8 @@ class Thymio {
         }
     }
     motor (motor) {
-        return this.cachedValues.get(`motor.${motor}.speed`);
+        const s = this.cachedValues.get(`motor.${motor}.speed`);
+        return s * 10 / 32;
     }
     nextDial (dir) {
         if (this._dial === -1) {
@@ -825,6 +836,8 @@ class Thymio {
         this.sendAction('V_leds_circle', args);
     }
     ledsProxH (fl, flm, flc, frc, frm, fr, br, bl) {
+        this.useHorizontalLeds = true;
+
         const args = [
             parseInt(clamp(fl, Thymio.LMIN, Thymio.LMAX), 10),
             parseInt(clamp(flm, Thymio.LMIN, Thymio.LMAX), 10),
@@ -1366,6 +1379,11 @@ class Scratch3ThymioBlocks {
                     }
                 },
                 {
+                    opcode: 'stopSoundRecord',
+                    text: messages.blocks.stopSoundRecord,
+                    blockType: BlockType.COMMAND
+                },
+                {
                     opcode: 'soundReplay',
                     text: messages.blocks.soundReplay,
                     blockType: BlockType.COMMAND,
@@ -1458,6 +1476,7 @@ class Scratch3ThymioBlocks {
                     arguments: {
                         N: {
                             type: ArgumentType.NUMBER,
+                            menu: 'horizontalSensors',
                             defaultValue: 2
                         }
                     }
@@ -1474,6 +1493,7 @@ class Scratch3ThymioBlocks {
                     arguments: {
                         N: {
                             type: ArgumentType.NUMBER,
+                            menu: 'groundSensors',
                             defaultValue: 0
                         }
                     }
@@ -1596,6 +1616,19 @@ class Scratch3ThymioBlocks {
                     {text: messages.menus.proxsensors.front_far_right, value: 4},
                     {text: messages.menus.proxsensors.back_left, value: 5},
                     {text: messages.menus.proxsensors.back_right, value: 6}
+                ],
+                horizontalSensors: [
+                    {text: messages.menus.horizontalSensors.front_far_left, value: 0},
+                    {text: messages.menus.horizontalSensors.front_left, value: 1},
+                    {text: messages.menus.horizontalSensors.front_center, value: 2},
+                    {text: messages.menus.horizontalSensors.front_right, value: 3},
+                    {text: messages.menus.horizontalSensors.front_far_right, value: 4},
+                    {text: messages.menus.horizontalSensors.back_left, value: 5},
+                    {text: messages.menus.horizontalSensors.back_right, value: 6}
+                ],
+                groundSensors: [
+                    {text: messages.menus.groundSensors.left, value: 0},
+                    {text: messages.menus.groundSensors.right, value: 1}
                 ],
                 light: [
                     {text: messages.menus.light.all, value: 'all'},
@@ -1833,6 +1866,9 @@ class Scratch3ThymioBlocks {
     }
     soundRecord (args) {
         this.thymio.soundRecord(args.N);
+    }
+    stopSoundRecord () {
+        this.thymio.soundRecord(-1);
     }
     soundReplay (args) {
         this.thymio.soundReplay(args.N);

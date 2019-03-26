@@ -23,7 +23,8 @@ const eventsDefinition = [
     {name: 'A_sound_record', fixed_size: 1},
     {name: 'M_motor_left', fixed_size: 1},
     {name: 'M_motor_right', fixed_size: 1},
-    {name: 'Q_reset', fixed_size: 0}
+    {name: 'Q_reset', fixed_size: 0},
+    {name: 'tap', fixed_size: 0}
 ];
 
 const asebaScript = `
@@ -46,6 +47,9 @@ var odo.y = 0
 var odo.degree
 
 mic.threshold = 12
+
+onevent tap
+  emit tap
 
 onevent Q_set_odometer
   odo.theta = (((event.args[0] + 360) % 360) - 90) * 182
@@ -129,7 +133,7 @@ onevent buttons
   call math.dot(angle.front, prox.horizontal,[4,3,0,-3,-4,0,0],9)
   call math.dot(angle.back, prox.horizontal,[0,0,0,0,0,-4,4],9)
   call math.dot(angle.ground, prox.ground.delta,[4,-4],7)
-  
+
 onevent Q_add_motion
   tmp[0:3] = event.args[0:3]
   callsub motion_add
@@ -191,7 +195,6 @@ onevent motor
   call math.fill(tmp,0)
   tmp[Qnx]=1
   tmp[Qpc]=4
-  call leds.buttons(tmp[0],tmp[1],tmp[2],tmp[3])
 `;
 
 module.exports = {eventsDefinition, asebaScript};
