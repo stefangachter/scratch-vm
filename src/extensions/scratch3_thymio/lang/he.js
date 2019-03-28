@@ -25,8 +25,8 @@ module.exports = {
         soundSystem: 'נגן צליל [S]',
         soundFreq: 'נגן תו בתדר [N]הרץ במשך [S] שניות',
         soundPlaySd: 'נגן צליל מכרטיס הזיכרון [N]',
-        soundRecord: 'הקלט צליל [N]',
-		stopSoundRecord: 'stop sound recording',//TODO
+        soundRecord: 'התחל הקלטת צליל [N]',
+        stopSoundRecord: 'עצור הקלטת צליל',
         soundReplay: 'השמע צליל מוקלט [N]',
         whenButton: 'בלחיצת כפתור [B]',
         touching: 'כאשר זוהה מכשול [S]',
@@ -77,18 +77,16 @@ module.exports = {
             back_left: 'אחורה-שמאל',
             back_right: 'אחורה-ימין'
         },
-		horizontalSensors: {
-            front_far_left: 'קדימה-שמאל-קיצוני',//TODO control
+            horizontalSensors: {
+            front_far_left: 'קדימה-שמאל-קיצוני',
             front_left: 'קדימה-שמאל',
             front_center: 'קדימה-מרכז',
             front_right: 'קדימה-ימין',
             front_far_right: 'קדימה-ימין-קיצוני',
-            back_left: 'אחורה-שמאל',
-            back_right: 'אחורה-ימין'
         },
-		groundSensors: {
-            left: 'left',//TODO
-            right: 'right'
+            groundSensors: {
+            left: 'שמאלי',
+            right: 'ימני'
         },
         light: {
             all: 'הכל',
