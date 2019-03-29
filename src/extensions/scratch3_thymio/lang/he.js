@@ -77,14 +77,16 @@ module.exports = {
             back_left: 'אחורה-שמאל',
             back_right: 'אחורה-ימין'
         },
-            horizontalSensors: {
+        horizontalSensors: {
             front_far_left: 'קדימה-שמאל-קיצוני',
             front_left: 'קדימה-שמאל',
             front_center: 'קדימה-מרכז',
             front_right: 'קדימה-ימין',
             front_far_right: 'קדימה-ימין-קיצוני',
+			back_left: 'אחורה-שמאל',
+            back_right: 'אחורה-ימין'
         },
-            groundSensors: {
+        groundSensors: {
             left: 'שמאלי',
             right: 'ימני'
         },
