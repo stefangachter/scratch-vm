@@ -1,50 +1,50 @@
 module.exports = {
     blocks: {
-        setMotor: '[M] Motordrehzahl [N]',
+        setMotor: 'setze Motor [M] auf Geschwindigkeit [N]',
         stopMotors: 'Motoren stoppen',
-        move: 'gehe [N]',
-        moveWithSpeed: 'gehe [N] mit Drehzahl [S]',
-        moveWithTime: 'gehe [N] in [S]s',
-        turn: 'drehe [N]',
-        turnWithSpeed: 'drehe [N] mit Drehzahl [S]',
-        turnWithTime: 'drehe [N] in [S]s',
-        arc: 'in einem Kreisradius [R] Winkel [A] bewegen',
-        setOdomoter: 'Geschwindigkeit Richtung [N] x: [O] y: [P] einstellen',
-        leds: 'LEDs [L] R: [R] G: [G] B: [B]',
-        setLeds: 'setze [L] LEDs Farbe Effekt auf [C]',
-        changeLeds: 'ändere [L] LEDs Farbe Effekt um [C]',
-        clearLeds: 'schallte LEDs aus',
-        nextDial: 'schalte beim nächsten Durchgang LEDs [L] ein',
-        ledsCircle: 'Kreis LEDs [A] [B] [C] [D] [E] [F] [G] [H]',
-        ledsProxH: 'horiz. Distanzmesser LEDs [A] [B] [C] [D] [E] [F] [G] [H]',
-        ledsProxV: 'Bodensensoren LEDs [A] [B]',
-        ledsButtons: 'Tasten LEDs [A] [B] [C] [D]',
-        ledsTemperature: 'TemperaturLEDs R: [A] B: [B]',
-        ledsRc: 'Fernbedienung LED [A]',
-        ledsSound: 'MikrofonLED [A]',
-        soundSystem: 'ton Sound abspielen [S]',
-        soundFreq: 'Töne bei [N]Hz während [S]s abspielen',
-        soundPlaySd: 'Sound-SD-Karte abspielen [N]',
-        soundRecord: 'Ton aufnehmen [N]',
-        stopSoundRecord: 'Tonaufnahme stoppen',
-        soundReplay: 'Ton wiedergeben [N]',
-        whenButton: 'wenn die [B] Taste gedrückt wird',
-        touching: 'wenn ein Objekt [S] erkannt wird',
-        notouching: 'wenn kein Objekt [S] erkannt wird',
-        touchingThreshold: 'wenn ein Objekt [S] [N] erkannt wird',
+        move: 'fahre um [N]',
+        moveWithSpeed: 'fahre um [N] mit Geschwindigkeit [S]',
+        moveWithTime: 'fahre um [N] in [S]s',
+        turn: 'drehe um [N]',
+        turnWithSpeed: 'drehe um [N] mit Geschwindigkeit [S]',
+        turnWithTime: 'drehe um [N] in [S]s',
+        arc: 'fahre einen Kreis mit Radius [R] und Winkel [A]',
+        setOdomoter: 'setze Geschwindigkeit [N] und Richtung x: [O] y: [P]',
+        leds: 'setze LED [L] auf Farbe R: [R] G: [G] B: [B]',
+        setLeds: 'setze LED [L] auf Farbeffekt [C]',
+        changeLeds: 'ändere LED [L] um Farbeffekt [C]',
+        clearLeds: 'schalte LED aus',
+        nextDial: 'schalte die LED im Ring ein, die auf LED [L] folgt',
+        ledsCircle: 'LED im Ring: [A] [B] [C] [D] [E] [F] [G] [H]',
+        ledsProxH: 'LED Abstandssensoren [A] [B] [C] [D] [E] [F] [G] [H]',
+        ledsProxV: 'LED Bodensensoren [A] [B]',
+        ledsButtons: 'LED Tasten [A] [B] [C] [D]',
+        ledsTemperature: 'LED Temperatur R: [A] B: [B]',
+        ledsRc: 'LED Fernbedienung [A]',
+        ledsSound: 'LED Mikrofon [A]',
+        soundSystem: 'Geräusch [S] abspielen',
+        soundFreq: 'Ton mit Frequenz [N]Hz während [S]s abspielen',
+        soundPlaySd: 'Geräusch [N] von SD-Karte abspielen',
+        soundRecord: 'Geräusch [N] aufnehmen',
+        stopSoundRecord: 'Aufnahme stoppen',
+        soundReplay: 'Geräusch [N] wiedergeben',
+        whenButton: 'wenn die Taste [B] gedrückt wird',
+        touching: 'wenn ein Hindernis [S] erkannt wird',
+        notouching: 'wenn kein Hindernis [S] erkannt wird',
+        touchingThreshold: 'wenn ein Hindernis [S] in Abstand [N] erkannt wird',
         bump: 'wenn ein Stoss erkannt wird',
-        soundDetected: 'wenn ein Ton erkannt wird',
-        valButton: '[B] Taste',
-        proximity: 'horiz. [N] Distanzmesser',
-        proxHorizontal: 'alle horiz. Distanzmesser anzeigen',
+        soundDetected: 'wenn ein Geräusch erkannt wird',
+        valButton: 'Taste [B]',
+        proximity: 'Abstandssensor [N]',
+        proxHorizontal: 'alle Abstandssensoren anzeigen',
         ground: 'Bodensensor [N]',
         proxGroundDelta: 'alle Bodensensoren anzeigen',
-        distance: 'Abstand  [S]',
+        distance: 'Abstand [S]',
         angle: 'Winkel [S]',
-        tilt: '[T] Neigungswinkel',
+        tilt: 'Neigungswinkel [T]',
         micIntensity: 'Lautstärke' ,
-        odometer: 'Geschwindigkeitsmesser [O]',
-        motor: '[M] Motordrehzahl'
+        odometer: 'Wegmesser [O]',
+        motor: 'Geschwindigkeit Motor [M]'
     },
     menus: {
         leftrightall: {
@@ -57,34 +57,34 @@ module.exports = {
             right: 'rechts'
         },
         sensors: {
-            front: 'vordere',
-            back: 'rückwärtig',
-            ground: 'Boden'
+            front: 'vorne',
+            back: 'hinten',
+            ground: 'unten'
         },
         sensors2: {
             left: 'links',
-            front: 'vordere',
+            front: 'vorne',
             right: 'rechts',
-            back: 'rückwärtig',
-            ground: 'Boden'
+            back: 'hinten',
+            ground: 'unten'
         },
         proxsensors: {
             front_far_left: 'links',
-            front_left: 'zentral links',
-            front_center: 'zentral',
-            front_right: 'zentral rechts',
+            front_left: 'Mitte links',
+            front_center: 'Mitte',
+            front_right: 'Mitte rechts',
             front_far_right: 'rechts',
-            back_left: 'rückwärtig links',
-            back_right: 'rückwärtig rechts'
+            back_left: 'hinten links',
+            back_right: 'hinten rechts'
         },
         horizontalSensors: {
             front_far_left: 'links',
-            front_left: 'zentral links',
-            front_center: 'zentral',
-            front_right: 'zentral rechts',
+            front_left: 'Mitte links',
+            front_center: 'Mitte',
+            front_right: 'Mitte rechts',
             front_far_right: 'rechts',
-            back_left: 'rückwärtig links',
-            back_right: 'rückwärtig rechts'
+            back_left: 'hinten links',
+            back_right: 'hinten rechts'
         },
         groundSensors: {
             left: 'links',
@@ -93,14 +93,14 @@ module.exports = {
         light: {
             all: 'alle',
             top: 'oben',
-            bottom: 'unterer',
-            bottom_left: 'unterer links',
-            bottom_right: 'unterer rechts'
+            bottom: 'unten',
+            bottom_left: 'unten links',
+            bottom_right: 'unten rechts'
         },
         angles: {
-            front: 'vordere',
-            back: 'rückwärtig',
-            ground: 'Boden'
+            front: 'vorne',
+            back: 'hinten',
+            ground: 'unten'
         },
         odo: {
             direction: 'Richtung',
@@ -108,16 +108,16 @@ module.exports = {
             y: 'y'
         },
         tilts: {
-            front_back: 'vorder-rückwärtig',
-            top_bottom: 'oben-unten',
-            left_right: 'links-rechts'
+            front_back: 'vorne nach hinten',
+            top_bottom: 'oben nach unten',
+            left_right: 'links nach rechts'
         },
         buttons: {
-            center: 'mittlere',
-            front: 'vordere',
-            back: 'rückwärtige',
-            left: 'linke',
-            right: 'rechte'
+            center: 'Mitte',
+            front: 'vorne',
+            back: 'hinten',
+            left: 'links',
+            right: 'rechts'
         },
         nearfar: {
             near: 'nahe',
