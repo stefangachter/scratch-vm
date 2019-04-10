@@ -15,7 +15,7 @@ module.exports = {
         changeLeds: 'ändere LED [L] um Farbeffekt [C]',
         clearLeds: 'schalte LED aus',
         nextDial: 'schalte die LED im Ring ein, die auf LED [L] folgt',
-        ledsCircle: 'LED im Ring: [A] [B] [C] [D] [E] [F] [G] [H]',
+        ledsCircle: 'LED im Ring [A] [B] [C] [D] [E] [F] [G] [H]',
         ledsProxH: 'LED Abstandssensoren [A] [B] [C] [D] [E] [F] [G] [H]',
         ledsProxV: 'LED Bodensensoren [A] [B]',
         ledsButtons: 'LED Tasten [A] [B] [C] [D]',
